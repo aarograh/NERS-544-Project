@@ -5,10 +5,13 @@
 #include<iostream>
 #include<iomanip>
 #include<cstdlib>
+#include "utils.h"
 
 using namespace std;
 
 int main()
 {
+  srand(1);
+  cout << normRand() << endl;
   return 0;
 }
