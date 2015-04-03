@@ -11,10 +11,16 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
 )
 
+# Includes
+include(CMakeDefaults)
+include(MacroEnsureOutOfSourceBuild)
+
+# Check paths
+MACRO_ENSURE_OUT_OF_SOURCE_BUILD("Attempted to build in source directory!")
+
 # Define project settings
 project(NERS-544-Project)
 set(APPLICATION_NAME ${PROJECT_NAME})
-include(CMakeDefaults)
 
 # Compile Program and Docs
 include_directories(inc)
