@@ -1,4 +1,23 @@
-cmake_minimum_required(VERSION 2.6)
+# AUTHORS: Aaron Graham, Mike Jarrett
+# PURPOSE: NERS 544 Course Project
+# DATE   : April 3, 2015
+
+# Basic setup stuff
+cmake_minimum_required(VERSION 2.8)
+
+# Set path for cmake
+set(CMAKE_MODULE_PATH
+  "${CMAKE_SOURCE_DIR}/cmake"
+  ${CMAKE_MODULE_PATH}
+)
+
+# Define project settings
 project(NERS-544-Project)
-add_subdirectory("${PROJECT_SOURCE_DIR}/src")
-add_executable(NERS-544 ${SOURCE} ${HEADERS})
+set(APPLICATION_NAME ${PROJECT_NAME})
+include(CMakeDefaults)
+
+# Compile Program and Docs
+include_directories(inc)
+add_subdirectory(src)
+add_subdirectory(doc)
+add_executable(NERS-544.exe ${SOURCE} ${HEADERS})
