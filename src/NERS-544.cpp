@@ -6,6 +6,9 @@
 #include<iomanip>
 #include<cstdlib>
 #include "utils.h"
+#include "particles.h"
+#include "geometry.h"
+#include "materials.h"
 
 using namespace std;
 
@@ -13,5 +16,9 @@ int main()
 {
   srand(1);
   cout << normRand() << endl;
+
+  material *water = new material();
+  material *fuel = new material();
+
   return 0;
 }
