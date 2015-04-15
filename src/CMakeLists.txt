@@ -1,0 +1,21 @@
+# AUTHORS: Aaron Graham, Mike Jarrett
+# PURPOSE: NERS 544 Course Project
+# DATE   : April 3, 2015
+
+set(SOURCE
+  ${SOURCE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/geometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/materials.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/particles.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NERS-544.cpp
+  PARENT_SCOPE
+)
+set(HEADERS
+  ${HEADERS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/geometry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/materials.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/particles.h
+  PARENT_SCOPE
+)
