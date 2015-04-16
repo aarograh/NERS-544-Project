@@ -14,8 +14,18 @@ using namespace std;
 
 int main()
 {
-  srand(1);
-  cout << normRand() << endl;
+  double pitch;
+  cout << "Enter the pin pitch in cm (must be greater than 3.0):";
+  cin >> pitch;
+
+  if (pitch <= 3.0)
+  {
+    cout << "Error!  Pin pitch must be greater than pin diameter of 3.0 cm!"
+      << endl;
+    return -1;
+  }
+
+  initPinCell(pitch);
 
   material *water = new material();
   material *fuel = new material();
