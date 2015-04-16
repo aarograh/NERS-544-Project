@@ -28,6 +28,7 @@ class material{
   double mod_macro(double,double*,double*,double*);
   double fuel_macro(double,double*,double*,double*);
   double sample_U(int,double,double*,double*);
+  void elastic(double,double,double*,double*[]);
   
   public:
     material();

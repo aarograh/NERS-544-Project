@@ -5,6 +5,7 @@
 #include<cstdlib>
 #include<cmath>
 #include "materials.h"
+#include "utils.h"
 
 material::material()
 {
@@ -151,4 +152,78 @@ double material::sample_U(int isotope, double E, double *abs_frac, double *fiss_
 //  else{
 //    cout << "Undefined fuel isotope. isotope = " << isotope << endl;
 //  }
+}
+
+void material::elastic(double temp, double A, double *v_n, double *d_n[3])
+{
+  double pi = 3.14159265358979;
+  double neut_mass = 939.565378E6; // eV
+  double kB = 8.6173324E-5; // eV K^-1
+  double beta = sqrt(neut_mass*A/(2*kB*temp)); 
+
+  double x;
+  double y = beta*(*v_n);
+  double w1 = sqrt(pi)*y/(2 + sqrt(pi)*y);
+
+  double eta = 1.0;
+  double f1 = 0.0;
+  double w, x1, x2, x3, Vtil, mutil;
+  while(eta > f1){ // sample until Vtil, mutil are accepted
+    w = normRand(); 
+    x1 = normRand();
+    x2 = normRand();  
+    if(w < w1){  // sample g1(x)
+      x3 = normRand(); 
+      x = sqrt(-log(x1) - log(x2)*cos(x3*pi/2)*cos(x3*pi/2));
+    }
+    else{ // sample g2(x)
+      x = sqrt(-log(x1*x2));
+    }
+
+    Vtil = x/beta; 
+    mutil = 2*normRand() - 1;
+
+    // check for rejection from scaled f1(V,mu) (Lecture Module 8)
+    eta = normRand();   
+    f1 = sqrt((*v_n)*(*v_n) + Vtil*Vtil - 2*(*v_n)*Vtil*mutil)/((*v_n)+Vtil);
+  }
+  
+  // sample direction vector for the target nucleus Omega_T-hat 
+  double gamma = 2*pi*normRand();
+  double Tx = mutil*(*d_n)[0] + ((*d_n)[0]*(*d_n)[2]*cos(gamma) - (*d_n)[1]*sin(gamma)*sqrt((1-mutil*mutil)/(1-(*d_n)[2]*(*d_n)[2])));
+  double Ty = mutil*(*d_n)[1] + ((*d_n)[1]*(*d_n)[2]*cos(gamma) - (*d_n)[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-(*d_n)[2]*(*d_n)[2])));
+  double Tz = mutil*(*d_n)[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-(*d_n)[2]*(*d_n)[2])); 
+
+  // center-of-mass velocity u_xyz
+  double ux = ((*v_n)*(*d_n)[0] + A*Vtil*Tx)/(1+A);  
+  double uy = ((*v_n)*(*d_n)[1] + A*Vtil*Ty)/(1+A);  
+  double uz = ((*v_n)*(*d_n)[2] + A*Vtil*Tz)/(1+A);  
+  double uu = sqrt(ux*ux + uy*uy + uz*uz); // center-of-mass speed
+
+  // neutron center-of-mass velocity
+  double vcx = (*v_n)*(*d_n)[0] - ux;
+  double vcy = (*v_n)*(*d_n)[1] - uy;
+  double vcz = (*v_n)*(*d_n)[2] - uz;
+  double vcn = sqrt(vcx*vcx + vcy*vcy + vcz*vcz);
+
+  // neutron center-of-mass direction vector
+  double ncx = vcx/vcn;
+  double ncy = vcy/vcn;
+  double ncz = vcz/vcn;
+
+  // outgoing neutron center-of-mass direction 
+  gamma = 2*pi*normRand();
+  double muc = 2*normRand() - 1;
+  double ncxp = muc*ncx + (ncx*ncz*cos(gamma) - ncy*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
+  double ncyp = muc*ncy + (ncy*ncz*cos(gamma) - ncx*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
+  double nczp = muc*ncz - cos(gamma)*sqrt((1-muc*muc)*(1-ncz*ncz)); 
+
+  // finally, outgoing neutron velocity in lab frame is calculated
+  double vncx = vcn*ncxp + ux;
+  double vncy = vcn*ncyp + uy;
+  double vncz = vcn*nczp + uz; 
+  *v_n = sqrt(vncx*vncx + vncy*vncy + vncz*vncz);
+  (*d_n)[0] = vncx/(*v_n);
+  (*d_n)[1] = vncy/(*v_n);
+  (*d_n)[2] = vncz/(*v_n);
 }
