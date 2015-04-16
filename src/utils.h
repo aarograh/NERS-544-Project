@@ -3,3 +3,4 @@
 // DATE   : April 3, 2015
 
 double normRand(void);
+double Watt(void);

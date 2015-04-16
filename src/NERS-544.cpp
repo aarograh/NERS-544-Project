@@ -27,8 +27,12 @@ int main()
 
   initPinCell(pitch);
 
+  srand(1);
+  cout << normRand() << endl;
+  
   material *water = new material();
   material *fuel = new material();
 
+  cout << Watt() << " MeV" << endl;
   return 0;
 }
