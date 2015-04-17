@@ -5,6 +5,7 @@
 #include<iostream>
 #include<iomanip>
 #include<cstdlib>
+#include<cmath>
 #include "utils.h"
 #include "particles.h"
 #include "geometry.h"
@@ -35,4 +36,24 @@ int main()
 
   cout << Watt() << " MeV" << endl;
   return 0;
+
+  int batch_size = 1E5;
+  double En[batch_size];
+  double xyz[3][batch_size];
+  double pinrad = 1.5; // pin radius = 1.5 cm
+  double r, gamma;
+  double pi = 3.14159265358979;
+  // sample neutrons for initial source bank
+  for(int i = 0; i < batch_size; i++){
+    // sample energy from Watt spectrum
+    En[i] = Watt();
+    // sample a radial location within the fuel cell
+    gamma = 2*pi*normRand();
+    r = pinrad*sqrt(normRand());
+    xyz[0][i] = r*cos(gamma);
+    xyz[1][i] = r*sin(gamma);
+    // sample an axial location
+    xyz[2][i] = 100.0*normRand(); 
+  }
+  
 }
