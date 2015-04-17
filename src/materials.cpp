@@ -7,7 +7,7 @@
 #include "materials.h"
 #include "utils.h"
 
-material::material()
+moderator::moderator()
 {
   // scattering cross sections
   mod_scat[0][0] = 2.0E+01; 
@@ -26,6 +26,9 @@ material::material()
   moddens[0] = 6.6911E-02;
   moddens[1] = 3.3455E-02;
 
+}
+fuel::fuel()
+{
   // scattering cross sections
   fuel_scat[0][0] = 4.0E+00;
   fuel_scat[0][1] = 1.5E-04;
@@ -85,7 +88,7 @@ material init_fuel()
   return fuel;
 }
 
-double material::mod_macro(double E, double *totalxs, double *H_frac, double *abs_frac)
+double moderator::mod_macro(double E, double *totalxs, double *H_frac, double *abs_frac)
 {
   double sqrE = sqrt(E);
   macabs_H = moddens[0]*mod_cap[1]/sqrE;
@@ -97,7 +100,7 @@ double material::mod_macro(double E, double *totalxs, double *H_frac, double *ab
   *abs_frac = macabs_H/(macabs_H+macscat_H);
 }
 
-double material::fuel_macro(double E, double *totalxs, double *frac_U235, double *frac_U238)
+double fuel::fuel_macro(double E, double *totalxs, double *frac_U235, double *frac_U238)
 {
   double sqrE = sqrt(E);
   // check for proximity to a resonance
@@ -122,7 +125,7 @@ double material::fuel_macro(double E, double *totalxs, double *frac_U235, double
   *frac_U238 = (macscat_U238+maccap_U238)/(*totalxs);
 }
 
-double material::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac)
+double fuel::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac)
 {
   double sqrE = sqrt(E);
   if(isotope == 235){
