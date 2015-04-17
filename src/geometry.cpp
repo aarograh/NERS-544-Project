@@ -34,6 +34,16 @@ plane::plane(int surfid, double position, int orientation)
 double plane::distToIntersect(double position[3], double direction[3])
 {
   double distance = -1.0;
+  double prod = norm[0]*direction[0] + norm[1]*direction[1] +
+    norm[2]*direction[2];
+
+  if (prod > 0.0 || prod < 0.0) //TODO: Implement an EPSILON
+  {
+    distance = ((point[0] - position[0])*norm[0] +
+      (point[1] - position[1])*norm[1] + (point[2] - position[2])*norm[2])/
+      prod;
+  }
+
   return distance;
 }
 
@@ -69,10 +79,8 @@ double cell::distToIntersect(double position[3], double direction[3])
   for (int i = 0; i < iSurfs.size(); i++)
   {
     surfid = iSurfs.at(i);
-//    surface* tmpsurf = surfaceList.at(surfid);
-//    double temp = (*tmpsurf).distToIntersect(position, direction);
     double temp = (*surfaceList.at(surfid)).distToIntersect(position,direction);
-    if (temp > 0.0 && temp < distance) distance = temp;
+    if (temp > 0.0 && (temp < distance || distance < 0.0)) distance = temp;
   }
 
   return distance;
