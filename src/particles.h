@@ -7,5 +7,4 @@ class particle{
   double weight;
   bool isAlive;
 
-  calcEntropy();
 };

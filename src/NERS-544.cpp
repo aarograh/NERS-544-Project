@@ -39,7 +39,7 @@ int main()
 
   int batch_size = 1E5;
   double En[batch_size];
-  double xyz[3][batch_size];
+  double xyz[batch_size][3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma;
   double pi = 3.14159265358979;
@@ -50,30 +50,30 @@ int main()
     // sample a radial location within the fuel cell
     gamma = 2*pi*normRand();
     r = pinrad*sqrt(normRand());
-    xyz[0][i] = r*cos(gamma);
-    xyz[1][i] = r*sin(gamma);
+    xyz[i][0] = r*cos(gamma);
+    xyz[i][1] = r*sin(gamma);
     // sample an axial location
-    xyz[2][i] = 100.0*normRand(); 
+    xyz[i][2] = 100.0*normRand(); 
   }
   
   // outer loop over power iterations
-  boolean converged = false;
+  bool converged = false;
   double ShannonEntropy = 0.0, PrevEntropy = 0.0;
   double tol_entropy = 1E-3;
-  int k = 0; l = 0;
+  int max_iters = 100;
+  int k = 0, l = 0, n = 0;
   while(k < max_iters){
     k = k+1; // total power iterations 
     
     // inner loop over the source bank
-    while(
-      
+    while(n < batch_size){
+      n = n+1;
     }
 
     // use fission bank to create source bank for next iteration
 
-
     PrevEntropy = ShannonEntropy;
-    ShannonEntropy = calcEntropy(xyz[0][],xyz[1][],xyz[2][]);
+    ShannonEntropy = calcEntropy(batch_size,xyz);
     // some convergence check
     if(converged){
       l = l+1; // power iterations with converged source

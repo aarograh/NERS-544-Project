@@ -4,3 +4,4 @@
 
 double normRand(void);
 double Watt(void);
+double calcEntropy(int,double(*)[3]);
