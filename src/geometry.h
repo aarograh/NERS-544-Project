@@ -10,23 +10,27 @@ class surface{
     surface();
 };
 
-class plane : surface{
+class plane : public surface{
   public:
-    plane();
+    double point[3];
+    double norm[3];
+    plane(int, double, int);
 };
 
-class cylinder : surface{
+class cylinder : public surface{
   public:
-    cylinder();
+    double origin[3];
+    double radius;
+    cylinder(int, double, double, double, double);
 };
 
 class cell{
   public:
     int id; // cell id number
     std::vector<int> iSurfs; // id numbers of surfaces which create this cell
-    std::vector<int> surfSens; // senses for each surface in iSurfs. 1 is +, 0 is -
+    std::vector<int> senses; // senses for each surface in iSurfs. 1 is +, -1 is -
     int matid;
-    cell();
+    cell(int, int, int*, int*);
     double distToSurf(double, double, double);
 };
 
