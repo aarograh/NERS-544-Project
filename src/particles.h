@@ -6,4 +6,6 @@ class particle{
   double x, y, z, omegax, omegay, omegaz, energy;
   double weight;
   bool isAlive;
+
+  calcEntropy();
 };

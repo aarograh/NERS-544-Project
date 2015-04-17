@@ -56,4 +56,33 @@ int main()
     xyz[2][i] = 100.0*normRand(); 
   }
   
+  // outer loop over power iterations
+  boolean converged = false;
+  double ShannonEntropy = 0.0, PrevEntropy = 0.0;
+  double tol_entropy = 1E-3;
+  int k = 0; l = 0;
+  while(k < max_iters){
+    k = k+1; // total power iterations 
+    
+    // inner loop over the source bank
+    while(
+      
+    }
+
+    // use fission bank to create source bank for next iteration
+
+
+    PrevEntropy = ShannonEntropy;
+    ShannonEntropy = calcEntropy(xyz[0][],xyz[1][],xyz[2][]);
+    // some convergence check
+    if(converged){
+      l = l+1; // power iterations with converged source
+    }
+    else{
+      // run some convergence check
+      if((ShannonEntropy-PrevEntropy) < tol_entropy){
+        converged = true;
+      }
+    }
+  }
 }
