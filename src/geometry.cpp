@@ -31,7 +31,8 @@ plane::plane(int surfid, double position, int orientation)
   }
 }
 
-double plane::distToIntersect(double position[3], double direction[3])
+double plane::distToIntersect(double position[3], double direction[3],
+    double intersection[3])
 {
   double distance = -1.0;
   double prod = norm[0]*direction[0] + norm[1]*direction[1] +
@@ -54,9 +55,35 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R)
   radius = R;
 }
 
-double cylinder::distToIntersect(double position[3], double direction[3])
+double cylinder::distToIntersect(double position[3], double direction[3],
+    double intersection[3])
 {
   double distance = -1.0;
+  double incidence = -1.0;
+/* dx = x2 - x1;
+   dy = y2 - y1;
+   dr = sqrt(dx*dx + dy*dy);
+   D = x1*y2 - x2*y1;
+
+   r2 = radius*radius;
+   dr2 = dr*dr;
+   D2 = D*D;
+   incidence = r2*dr2 - D2
+   x1/2 = (D*dy +/- sign(dy)*dx*sqrt(r2*dr2 - D2))/dr2;
+   y1/2 = (-D*dx +/- abs(dy)*sqrt(r2*dr2 - D2))/dr2; */
+
+  if (incidence > 0.0)
+  {
+    
+  }
+  else if (incidence == 0.0)
+  {
+  }
+  else
+  {
+    distance = -1.0;
+  }
+
   return distance;
 }
 
@@ -71,7 +98,8 @@ cell::cell(int cellid, int size, int* surfs, int* sense)
   }
 }
 
-double cell::distToIntersect(double position[3], double direction[3])
+double cell::distToIntersect(double position[3], double direction[3],
+  double intersection[3])
 {
   double distance = -1.0;
   int surfid = 0;
@@ -79,7 +107,8 @@ double cell::distToIntersect(double position[3], double direction[3])
   for (int i = 0; i < iSurfs.size(); i++)
   {
     surfid = iSurfs.at(i);
-    double temp = (*surfaceList.at(surfid)).distToIntersect(position,direction);
+    double temp = 
+      (*surfaceList.at(surfid)).distToIntersect(position,direction,intersection);
     if (temp > 0.0 && (temp < distance || distance < 0.0)) distance = temp;
   }
 
@@ -122,9 +151,10 @@ void initPinCell(double pitch)
     cellList.push_back(new cell(cellList.size()+1,7,isurfs,sense));
   }
 
-  double position[3] = {2.0, 0.0, 0.0};
+  double position[3] = {-2.0, 0.0, 0.0};
   double direction[3] = {1.0, 0.0, 0.0};
-  std::cout << "Distance: " << (*cellList.at(1)).distToIntersect(position,direction) << std::endl;
+  double intersection[3];
+  std::cout << "Distance: " << (*cellList.at(1)).distToIntersect(position,direction,intersection) << std::endl;
 
   return;
 }
