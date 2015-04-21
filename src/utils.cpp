@@ -6,7 +6,7 @@
 #include<limits>
 #include<cmath>
 
-const double eps = std::numeric_limits<double>::epsilon();
+const double eps = std::numeric_limits<double>::epsilon()*100.0;
 
 // Random number generator on [0,1]
 double normRand(void)
