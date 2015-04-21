@@ -5,3 +5,6 @@
 double normRand(void);
 double Watt(void);
 double calcEntropy(int,double(*)[3]);
+bool approxeq(double,double);
+bool approxge(double,double);
+bool approxle(double,double);

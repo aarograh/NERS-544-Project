@@ -3,7 +3,10 @@
 // DATE   : April 3, 2015
 
 #include<cstdlib>
+#include<limits>
 #include<cmath>
+
+const double eps = std::numeric_limits<double>::epsilon();
 
 // Random number generator on [0,1]
 double normRand(void)
@@ -58,4 +61,19 @@ double calcEntropy(int batch_size, double xyz[][3])
   }
   entropy = -entropy;
   return entropy;
+}
+
+bool approxeq(double x1, double x2)
+{
+  return (x1 > x2 - eps && x1 < x2 + eps);
+}
+
+bool approxge(double x1, double x2)
+{
+  return (x1 > x2 - eps);
+}
+
+bool approxle(double x1, double x2)
+{
+  return (x1 < x2 + eps);
 }
