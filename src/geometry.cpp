@@ -6,6 +6,7 @@
 #include<iostream>
 #include<cstdlib>
 #include<cmath>
+#include "utils.h"
 #include "geometry.h"
 
 std::vector<surface*> surfaceList;
@@ -30,6 +31,9 @@ plane::plane(int surfid, double position, int orientation)
       point[0] = 0.0; point[1] = 0.0; point[2] = position;
       norm[0] = 0.0; norm[1] = 0.0; norm[2] = 1.0;
       break;
+    default:
+      std::cout << "Error when constructing plane!" << std::endl;
+      abort();
   }
 }
 
@@ -65,7 +69,7 @@ double cylinder::distToIntersect(double position[3], double direction[3],
   double x, y, a, b, c, dis, m;
   double xp, xm, yp, ym, d2o, tmp;
 
-  if (direction[0] == 0.0 && direction[1] == 0.0) return -1.0;
+  if (approxeq(direction[0],0.0) && approxeq(direction[1],0.0)) return -1.0;
 
   x = position[0] - origin[0];
   y = position[1] - origin[1];
@@ -77,7 +81,7 @@ double cylinder::distToIntersect(double position[3], double direction[3],
   c = y*y + m*m*x*x - 2.0*y*x*m - radius*radius;
   dis = b*b - 4.0*a*c;
 
-  if (direction[0] == 0.0)
+  if (approxeq(direction[0],0.0))
   {
     yp = sin(acos(x/radius))*radius;
     ym = -yp;
@@ -135,7 +139,7 @@ double cylinder::distToIntersect(double position[3], double direction[3],
         (intersection[2] - position[2]));
     }
   }
-  else if (dis == 0.0)
+  else if (approxeq(dis,0.0))
   {
     xp = -b/(2.0*a);
     if ((x < xp && direction[0] > 0.0) || (x > xp && direction[0] < 0.0))
