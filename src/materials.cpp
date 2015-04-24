@@ -4,11 +4,16 @@
 
 #include<cstdlib>
 #include<cmath>
+#include<vector>
 #include "materials.h"
 #include "utils.h"
 
-moderator::moderator()
+std::vector<material*> materialList;
+
+moderator::moderator(int matid)
 {
+  id = matid;
+
   // scattering cross sections
   mod_scat[0][0] = 2.0E+01; 
   mod_scat[0][1] = 3.0E-03; 
@@ -27,8 +32,10 @@ moderator::moderator()
   moddens[1] = 3.3455E-02;
 
 }
-fuel::fuel()
+fuel::fuel(int matid)
 {
+  id = matid;
+
   // scattering cross sections
   fuel_scat[0][0] = 4.0E+00;
   fuel_scat[0][1] = 1.5E-04;
@@ -76,16 +83,13 @@ fuel::fuel()
   fueldens[2] = 2.2696E-02;
 }
 
-material init_water()
+void init_materials(int& fuelid, int& modid)
 {
-  material water;
-  return water;
-}
-
-material init_fuel()
-{
-  material fuel;
-  return fuel;
+  fuelid = 0;
+  materialList.push_back(new fuel(fuelid));
+  modid = 1;
+  materialList.push_back(new moderator(modid));
+  return;
 }
 
 double moderator::mod_macro(double E, double *totalxs, double *H_frac, double *abs_frac)

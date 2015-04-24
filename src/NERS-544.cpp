@@ -15,6 +15,9 @@ using namespace std;
 
 int main()
 {
+  srand(time(NULL));
+
+  int fuelid, modid;
   double pitch;
   cout << "Enter the pin pitch in cm (must be greater than 3.0):";
   cin >> pitch;
@@ -26,15 +29,9 @@ int main()
     return -1;
   }
 
+  init_materials(fuelid, modid);
   initPinCell(pitch);
 
-  srand(1);
-  cout << normRand() << endl;
-  
-  material *water = new material();
-  material *fuel = new material();
-
-  cout << Watt() << " MeV" << endl;
   return 0;
 
   int batch_size = 1E5;
@@ -43,6 +40,7 @@ int main()
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma;
   double pi = 3.14159265358979;
+
   // sample neutrons for initial source bank
   for(int i = 0; i < batch_size; i++){
     // sample energy from Watt spectrum
