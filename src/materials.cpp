@@ -176,11 +176,11 @@ void material::elastic(double temp, double A, double *v_n, double *d_n[3])
   double f1 = 0.0;
   double w, x1, x2, x3, Vtil, mutil;
   while(eta > f1){ // sample until Vtil, mutil are accepted
-    w = normRand(); 
-    x1 = normRand();
-    x2 = normRand();  
+    w = drand(); 
+    x1 = drand();
+    x2 = drand();  
     if(w < w1){  // sample g1(x)
-      x3 = normRand(); 
+      x3 = drand(); 
       x = sqrt(-log(x1) - log(x2)*cos(x3*pi/2)*cos(x3*pi/2));
     }
     else{ // sample g2(x)
@@ -188,15 +188,15 @@ void material::elastic(double temp, double A, double *v_n, double *d_n[3])
     }
 
     Vtil = x/beta; 
-    mutil = 2*normRand() - 1;
+    mutil = 2*drand() - 1;
 
     // check for rejection from scaled f1(V,mu) (Lecture Module 8)
-    eta = normRand();   
+    eta = drand();   
     f1 = sqrt((*v_n)*(*v_n) + Vtil*Vtil - 2*(*v_n)*Vtil*mutil)/((*v_n)+Vtil);
   }
   
   // sample direction vector for the target nucleus Omega_T-hat 
-  double gamma = 2*pi*normRand();
+  double gamma = 2*pi*drand();
   double Tx = mutil*(*d_n)[0] + ((*d_n)[0]*(*d_n)[2]*cos(gamma) - (*d_n)[1]*sin(gamma)*sqrt((1-mutil*mutil)/(1-(*d_n)[2]*(*d_n)[2])));
   double Ty = mutil*(*d_n)[1] + ((*d_n)[1]*(*d_n)[2]*cos(gamma) - (*d_n)[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-(*d_n)[2]*(*d_n)[2])));
   double Tz = mutil*(*d_n)[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-(*d_n)[2]*(*d_n)[2])); 
@@ -219,8 +219,8 @@ void material::elastic(double temp, double A, double *v_n, double *d_n[3])
   double ncz = vcz/vcn;
 
   // outgoing neutron center-of-mass direction 
-  gamma = 2*pi*normRand();
-  double muc = 2*normRand() - 1;
+  gamma = 2*pi*drand();
+  double muc = 2*drand() - 1;
   double ncxp = muc*ncx + (ncx*ncz*cos(gamma) - ncy*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
   double ncyp = muc*ncy + (ncy*ncz*cos(gamma) - ncx*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
   double nczp = muc*ncz - cos(gamma)*sqrt((1-muc*muc)*(1-ncz*ncz)); 
