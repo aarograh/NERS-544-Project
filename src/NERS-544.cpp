@@ -71,17 +71,21 @@ int main()
     k = k+1; // total power iterations 
     
     // inner loop over the source bank
-    for (n = batch_size - 1; n > 0; n--)
+    while(!sourceBank.empty())
     {
-      neutron = sourceBank.at(n);
+      // Get pointer to particle
+      neutron = sourceBank.back();
+      // Simulate particle
       fissions = (*neutron).simulate();
+      // Create fission neutrons (if fissions > 0)
       for (int i = 0; i < fissions; i++)
       {
         fissionBank.push_back(fissionNeutron(neutron));
       }
+      // Delete pointer to neutron in sourcebank;
+      sourceBank.pop_back();
+      delete neutron;
     }
-
-    // use fission bank to create source bank for next iteration
 
     // Calculate Shannon Entropy
     PrevEntropy = ShannonEntropy;
@@ -96,6 +100,24 @@ int main()
       if((ShannonEntropy-PrevEntropy) < tol_entropy){
         converged = true;
       }
+    }
+
+    // use fission bank to create source bank for next iteration
+    if (fissionBank.size() == batch_size) // Fission bank is correct size
+    {
+      while (!fissionBank.empty())
+      {
+        sourceBank.push_back(fissionBank.back());
+        fissionBank.pop_back();
+      }
+    }
+    else if (fissionBank.size() > batch_size) // Fission bank is too large
+    {
+      //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    }
+    else // fission bank is too small
+    {
+      //Add entire fission bank to source back, and duplicate some of them
     }
   }
 
