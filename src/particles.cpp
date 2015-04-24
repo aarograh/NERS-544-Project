@@ -24,3 +24,15 @@ particle::particle(double xyz[3], double gamma, double mu, double E_in,
 
   return;
 }
+
+int particle::simulate()
+{
+  return 0;
+}
+
+particle* fissionNeutron(particle* neutron)
+{
+  double tmp[3] = {0.0,0.0,0.0};
+  particle* fissNeutron = new particle(tmp,0.0,0.0,0.0,1);
+  return fissNeutron;
+}

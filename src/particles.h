@@ -12,4 +12,7 @@ class particle{
   public:
     bool isAlive;
     particle(double[3], double, double, double, int);
+    int simulate();
 };
+
+particle* fissionNeutron(particle* neutron);
