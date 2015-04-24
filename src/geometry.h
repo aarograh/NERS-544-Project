@@ -36,4 +36,4 @@ class cell{
     double distToIntersect(double[3], double[3], double[3]);
 };
 
-void initPinCell(double);
+void initPinCell(double, int, int);

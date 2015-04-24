@@ -189,7 +189,7 @@ double cell::distToIntersect(double position[3], double direction[3],
   return distance;
 }
 
-void initPinCell(double pitch)
+void initPinCell(double pitch, int fuelid, int modid)
 {
   double halfpitch = pitch/2.0;
   double height = 100.0;
@@ -206,7 +206,7 @@ void initPinCell(double pitch)
   {
     int isurfs[3] = {0,1,2};
     int sense[3] = {-1,-1,1};
-    cellList.push_back(new cell(cellList.size()+1,3,isurfs,sense));
+    cellList.push_back(new cell(fuelid,3,isurfs,sense));
   }
 
 // Construct the "box" for the moderator
@@ -222,7 +222,7 @@ void initPinCell(double pitch)
   {
     int isurfs[7] = {0,1,2,3,4,5,6};
     int sense[7] = {1,-1,1,1,-1,1,-1};
-    cellList.push_back(new cell(cellList.size()+1,7,isurfs,sense));
+    cellList.push_back(new cell(modid,7,isurfs,sense));
   }
 
   return;

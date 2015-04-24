@@ -30,7 +30,7 @@ int main()
   }
 
   init_materials(fuelid, modid);
-  initPinCell(pitch);
+  initPinCell(pitch, fuelid, modid);
 
   return 0;
 
