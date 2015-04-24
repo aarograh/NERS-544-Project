@@ -6,6 +6,8 @@
 
 class surface{
   public:
+    bool boundary;
+    int boundaryType;
     int id;
     virtual double distToIntersect(double*, double*, double*) = 0;
 };
@@ -14,7 +16,7 @@ class plane : public surface{
   public:
     double point[3];
     double norm[3];
-    plane(int, double, int);
+    plane(int, double, int, int);
     double distToIntersect(double*, double*, double*);
 };
 
@@ -22,7 +24,7 @@ class cylinder : public surface{
   public:
     double origin[3];
     double radius;
-    cylinder(int, double, double, double, double);
+    cylinder(int, double, double, double, double, int);
     double distToIntersect(double*, double*, double*);
 };
 

@@ -13,9 +13,10 @@ std::vector<surface*> surfaceList;
 std::vector<cell*> cellList;
 
 const int xplane = 1, yplane = 2, zplane = 3;
+const int interior = -1, vacuum = 0, reflecting = 1;
 
 // Constructor for plane class
-plane::plane(int surfid, double position, int orientation)
+plane::plane(int surfid, double position, int orientation, int bound_in)
 {
   // Set surface id
   id = surfid;
@@ -66,12 +67,23 @@ double plane::distToIntersect(double position[3], double direction[3],
 // Constructor for cylindrical surface
 // It is assumed that the cylinder's axis begins at (0,0,0) and
 // points along the z-axis
-cylinder::cylinder(int surfid, double x, double y, double z, double R)
+cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound_in)
 {
   // Set values
   id = surfid;
   origin[0] = x; origin[1] = y; origin[2] = z;
   radius = R;
+  switch(bound_in)
+  {
+    case reflecting:
+    case vacuum:
+      boundary = true;
+      boundaryType = bound_in;
+      break;
+    default:
+      boundary = false;
+      boundaryType = -1;
+  }
 }
 
 // Function to calculate distance between a cylindrical surface and a point
@@ -252,11 +264,11 @@ void initPinCell(double pitch, int fuelid, int modid)
 
 // Build the fuel pin
   // Construct cylinder for fuel pin
-  surfaceList.push_back(new cylinder(surfaceList.size()+1,0.0,0.0,0.0,1.5));
+  surfaceList.push_back(new cylinder(surfaceList.size()+1,0.0,0.0,0.0,1.5,-1));
   // Construct top plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,100.0,zplane));
+  surfaceList.push_back(new plane(surfaceList.size()+1,100.0,zplane,0));
   // Construct bottom plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,0.0,zplane));
+  surfaceList.push_back(new plane(surfaceList.size()+1,0.0,zplane,0));
   // Construct the cell
   {
     int isurfs[3] = {0,1,2};
@@ -266,13 +278,13 @@ void initPinCell(double pitch, int fuelid, int modid)
 
 // Construct the "box" for the moderator
   // Construct left plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,-halfpitch,xplane));
+  surfaceList.push_back(new plane(surfaceList.size()+1,-halfpitch,xplane,1));
   // Construct right plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,halfpitch,xplane));
+  surfaceList.push_back(new plane(surfaceList.size()+1,halfpitch,xplane,1));
   // Construct front plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,-halfpitch,yplane));
+  surfaceList.push_back(new plane(surfaceList.size()+1,-halfpitch,yplane,1));
   // Construct back plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,halfpitch,yplane));
+  surfaceList.push_back(new plane(surfaceList.size()+1,halfpitch,yplane,1));
   // Construct the cell
   {
     int isurfs[7] = {0,1,2,3,4,5,6};
