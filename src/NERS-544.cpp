@@ -32,55 +32,64 @@ int main()
   init_materials(fuelid, modid);
   initPinCell(pitch, fuelid, modid);
 
-  return 0;
-
   int batch_size = 1E5;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
   double pi = 3.14159265358979;
-  vector<particle*> particleBank;
+  vector<particle*> sourceBank;
 
   // sample neutrons for initial source bank
   for(int i = 0; i < batch_size; i++){
     // sample energy from Watt spectrum
     En = Watt();
     // sample a radial location within the fuel cell
-    gamma = 2*pi*normRand();
-    r = pinrad*sqrt(normRand());
+    gamma = 2*pi*drand();
+    r = pinrad*sqrt(drand());
     xyz[0] = r*cos(gamma);
     xyz[1] = r*sin(gamma);
     // sample an axial location
-    xyz[2] = 100.0*normRand(); 
+    xyz[2] = 100.0*drand(); 
     // sample a direction
-    gamma = normRand();
-    mu = 2.0*normRand() - 1.0;
+    gamma = drand();
+    mu = 2.0*drand() - 1.0;
     // add particle to the bank
-    particleBank.push_back(new particle(xyz,gamma,mu,En,fuelid));
+    sourceBank.push_back(new particle(xyz,gamma,mu,En,fuelid));
   }
   
   // outer loop over power iterations
   bool converged = false;
   double ShannonEntropy = 0.0, PrevEntropy = 0.0;
   double tol_entropy = 1E-3;
-  int max_iters = 100;
-  int k = 0, l = 0, n = 0;
+  const int max_iters = 100, active_iters = 10;
+  int k = 0, l = 0, n = 0, fissions;
+  particle* neutron;
+  vector<particle*> fissionBank;
+
   while(k < max_iters){
     k = k+1; // total power iterations 
     
     // inner loop over the source bank
-    while(n < batch_size){
-      n = n+1;
+    for (n = batch_size - 1; n > 0; n--)
+    {
+      neutron = sourceBank.at(n);
+      fissions = (*neutron).simulate();
+      for (int i = 0; i < fissions; i++)
+      {
+        fissionBank.push_back(fissionNeutron(neutron));
+      }
     }
 
     // use fission bank to create source bank for next iteration
 
+    // Calculate Shannon Entropy
     PrevEntropy = ShannonEntropy;
     //ShannonEntropy = calcEntropy(batch_size,xyz);
     // some convergence check
     if(converged){
       l = l+1; // power iterations with converged source
+      if (l >= active_iters) break;
     }
     else{
       // run some convergence check
@@ -89,4 +98,6 @@ int main()
       }
     }
   }
+
+  return 0;
 }
