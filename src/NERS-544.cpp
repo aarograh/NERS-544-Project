@@ -35,23 +35,29 @@ int main()
   return 0;
 
   int batch_size = 1E5;
-  double En[batch_size];
-  double xyz[batch_size][3];
+  double En;
+  double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
-  double r, gamma;
+  double r, gamma, mu;
   double pi = 3.14159265358979;
+  vector<particle*> particleBank;
 
   // sample neutrons for initial source bank
   for(int i = 0; i < batch_size; i++){
     // sample energy from Watt spectrum
-    En[i] = Watt();
+    En = Watt();
     // sample a radial location within the fuel cell
     gamma = 2*pi*normRand();
     r = pinrad*sqrt(normRand());
-    xyz[i][0] = r*cos(gamma);
-    xyz[i][1] = r*sin(gamma);
+    xyz[0] = r*cos(gamma);
+    xyz[1] = r*sin(gamma);
     // sample an axial location
-    xyz[i][2] = 100.0*normRand(); 
+    xyz[2] = 100.0*normRand(); 
+    // sample a direction
+    gamma = normRand();
+    mu = 2.0*normRand() - 1.0;
+    // add particle to the bank
+    particleBank.push_back(new particle(xyz,gamma,mu,En,fuelid));
   }
   
   // outer loop over power iterations
@@ -71,7 +77,7 @@ int main()
     // use fission bank to create source bank for next iteration
 
     PrevEntropy = ShannonEntropy;
-    ShannonEntropy = calcEntropy(batch_size,xyz);
+    //ShannonEntropy = calcEntropy(batch_size,xyz);
     // some convergence check
     if(converged){
       l = l+1; // power iterations with converged source
