@@ -14,9 +14,14 @@ std::vector<cell*> cellList;
 
 const int xplane = 1, yplane = 2, zplane = 3;
 
+// Constructor for plane class
 plane::plane(int surfid, double position, int orientation)
 {
+  // Set surface id
   id = surfid;
+  // Set normal vector depending on which axis the plane intersects
+  // Only planes which have normal vectors parallel to an axia are
+  // supported right now.
   switch(orientation)
   {
     case xplane:
@@ -37,15 +42,19 @@ plane::plane(int surfid, double position, int orientation)
   }
 }
 
+// Function to calculate distance between a plane and a point with an
+// associated direction vector
 double plane::distToIntersect(double position[3], double direction[3],
     double intersection[3])
 {
   double distance = -1.0;
+  // Take dot product of position vector and plane's normal vector
   double prod = norm[0]*direction[0] + norm[1]*direction[1] +
     norm[2]*direction[2];
 
-  if (prod > 0.0 || prod < 0.0) //TODO: Implement an EPSILON
+  if (!approxeq(prod,0.0))
   {
+    // Calculate the distance between position and the plane
     distance = ((point[0] - position[0])*norm[0] +
       (point[1] - position[1])*norm[1] + (point[2] - position[2])*norm[2])/
       prod;
@@ -54,13 +63,19 @@ double plane::distToIntersect(double position[3], double direction[3],
   return distance;
 }
 
+// Constructor for cylindrical surface
+// It is assumed that the cylinder's axis begins at (0,0,0) and
+// points along the z-axis
 cylinder::cylinder(int surfid, double x, double y, double z, double R)
 {
+  // Set values
   id = surfid;
   origin[0] = x; origin[1] = y; origin[2] = z;
   radius = R;
 }
 
+// Function to calculate distance between a cylindrical surface and a point
+// with an association direction vector
 double cylinder::distToIntersect(double position[3], double direction[3],
     double intersection[3])
 {
@@ -69,85 +84,115 @@ double cylinder::distToIntersect(double position[3], double direction[3],
   double x, y, a, b, c, dis, m;
   double xp, xm, yp, ym, d2o, tmp;
 
+  // If vector is parallel with z-axis, return
   if (approxeq(direction[0],0.0) && approxeq(direction[1],0.0)) return -1.0;
 
+  // Shift system so that cylinder is center at origin (in x-y)
   x = position[0] - origin[0];
   y = position[1] - origin[1];
+  // Calculate 2D slope of vector
   m = direction[1]/direction[0];
+  // Calculate 2D distance from position to cylinder's origin
   d2o = sqrt(x*x + y*y);
 
+  // Calculate a, b, c, and discriminant for quadratice formula
   a = 1.0 + m*m;
   b = -2.0*m*m*x + 2.0*y*m;
   c = y*y + m*m*x*x - 2.0*y*x*m - radius*radius;
   dis = b*b - 4.0*a*c;
 
+  // If vector is pointing straight down in 2D, slope is 0, so
+  // we treat this case specially
   if (approxeq(direction[0],0.0))
   {
+    // Calculate 2 possible intersections
     yp = sin(acos(x/radius))*radius;
     ym = -yp;
+    // If inside circle and going up, or outside circle and going down
+    // to intersect circle:
     if ((d2o < radius && direction[1] > 0.0) || 
       (d2o > radius && direction[1] < 0.0 && y > 0.0 && fabs(x) <= radius))
     {
+      // Select top y-value.  x-value is unchanged
       intersection[1] = yp;
       intersection[0] = x;
       tmp = (intersection[0] - x)*(intersection[0] - x) +
         (intersection[1] - y)*(intersection[1] - y);
+      // Calculate z-value and distance
       intersection[2] = position[2] + sqrt(tmp)*direction[2]/
         sqrt(direction[0]*direction[0] + direction[1]*direction[1]);
       distance = sqrt(tmp + (intersection[2] - position[2])*
         (intersection[2] - position[2]));
     }
+    // If inside circle and going down, or outside circle and going up
+    // to intersect circle:
     else if ((d2o < radius && direction[1] < 0.0) ||
       (d2o > radius && direction[1] > 0.0 && y < 0.0 && fabs(x) <= radius))
     {
+      // Select bottom y-value.  x-value is unchanged
       intersection[1] = ym;
       intersection[0] = x;
       tmp = (intersection[0] - x)*(intersection[0] - x) +
         (intersection[1] - y)*(intersection[1] - y);
+      // Calculate z-value and distance
       intersection[2] = position[2] + sqrt(tmp)*direction[2]/
         sqrt(direction[0]*direction[0] + direction[1]*direction[1]);
       distance = sqrt(tmp + (intersection[2] - position[2])*
         (intersection[2] - position[2]));
     }
   }
+  // If discriminant > 0, then line intersects circle twice
   else if (dis > 0.0)
   {
+    // Calculate both x values
     xp = (-b + sqrt(dis))/(2.0*a);
     xm = (-b - sqrt(dis))/(2.0*a);
+    // If the rightmost x-value is needed
     if ((x > xm && x < xp && direction[0] > 0.0) ||
       (x > xp && direction[0] < 0.0))
     {
+      // Set x-value, calculate y-value using point-slop formula
       intersection[0] = xp;
       intersection[1] = m*(xp - x) + y;
       tmp = (intersection[0] - x)*(intersection[0] - x) +
         (intersection[1] - y)*(intersection[1] - y);
+      // Calculate z-value and distance
       intersection[2] = position[2] + sqrt(tmp)*direction[2]/
         sqrt(direction[0]*direction[0] + direction[1]*direction[1]);
       distance = sqrt(tmp + (intersection[2] - position[2])*
         (intersection[2] - position[2]));
     }
+    // If the leftmost x-value is needed
     else if ((x > xm && x < xp && direction[0] < 0.0) ||
       (x < xm && direction[0] > 0.0))
     {
+      // Set x-value, calculate y-value using point-slope formula
       intersection[0] = xm;
       intersection[1] = m*(xm - x) + y;
       tmp = (intersection[0] - x)*(intersection[0] - x) +
         (intersection[1] - y)*(intersection[1] - y);
+      // Calculate z-value and distance
       intersection[2] = position[2] + sqrt(tmp)*direction[2]/
         sqrt(direction[0]*direction[0] + direction[1]*direction[1]);
       distance = sqrt(tmp + (intersection[2] - position[2])*
         (intersection[2] - position[2]));
     }
   }
+  // If discriminant == 0, there is only 1 intersection
   else if (approxeq(dis,0.0))
   {
+    // Calculate x value
     xp = -b/(2.0*a);
+    // Ensure that the vector is pointing the correct direction to
+    // use this point
     if ((x < xp && direction[0] > 0.0) || (x > xp && direction[0] < 0.0))
     {
+      // Set x-value, calculate y-value with point-slope formula
       intersection[0] = xp;
       intersection[1] = m*(xp - x) + y;
       tmp = (intersection[0] - x)*(intersection[0] - x) +
         (intersection[1] - y)*(intersection[1] - y);
+      // Calculate z-value and distance
       intersection[2] = position[2] + sqrt(tmp)*direction[2]/
         sqrt(direction[0]*direction[0] + direction[1]*direction[1]);
       distance = sqrt(tmp + (intersection[2] - position[2])*
@@ -155,16 +200,20 @@ double cylinder::distToIntersect(double position[3], double direction[3],
     }
   }
 
+  // Shift back to global coordinates
   intersection[0] += origin[0];
   intersection[1] += origin[1];
 
+  // Return the distance value, which is -1.0 if there was no intersection
   return distance;
 }
 
+// Constructor for cell class
 cell::cell(int cellid, int size, int* surfs, int* sense)
 {
   id = cellid;
   matid = 0;
+  // Loop over surfaces, adding the surface and its sense to vectors
   for (int i = 0; i < size; i++, surfs++, sense++)
   {
     iSurfs.push_back(*surfs);
@@ -172,28 +221,34 @@ cell::cell(int cellid, int size, int* surfs, int* sense)
   }
 }
 
+// Calculate the distance to the nearest surface for a cell
 double cell::distToIntersect(double position[3], double direction[3],
   double intersection[3])
 {
   double distance = -1.0;
   int surfid = 0;
 
+  // Loop over surfaces
   for (int i = 0; i < iSurfs.size(); i++)
   {
+    // Get surface id
     surfid = iSurfs.at(i);
+    // Calculate distancce to that surface
     double temp = 
       (*surfaceList.at(surfid)).distToIntersect(position,direction,intersection);
+    // If this distance is better than the best so far, assign it
     if (temp > 0.0 && (temp < distance || distance < 0.0)) distance = temp;
   }
 
   return distance;
 }
 
+// Function to initialize a pin cell
 void initPinCell(double pitch, int fuelid, int modid)
 {
   double halfpitch = pitch/2.0;
-  double height = 100.0;
-  double radius = 1.5;
+  double height = 100.0; // Height is hard-coded, but could easily be changed
+  double radius = 1.5; // Radius is hard-coded, but could easily be changed
 
 // Build the fuel pin
   // Construct cylinder for fuel pin
