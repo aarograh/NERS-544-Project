@@ -7,7 +7,6 @@
 #include<cstdlib>
 #include "materials.h"
 #include "utils.h"
-#include "materials.h"
 
 std::vector<material*> materialList;
 

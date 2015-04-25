@@ -6,9 +6,6 @@
 #include<limits>
 #include<cmath>
 #include "utils.h"
-#include "particles.h"
-
-const double eps = std::numeric_limits<double>::epsilon()*100.0;
 
 // Random number generator on [0,1]
 double drand(void)
