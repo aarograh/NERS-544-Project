@@ -16,7 +16,6 @@ const double nudge = 10.0*eps;
 // Functions
 double drand(void);
 double Watt(void);
-double calcEntropy(int,double(*)[3]);
 bool approxeq(double,double);
 bool approxge(double,double);
 bool approxle(double,double);

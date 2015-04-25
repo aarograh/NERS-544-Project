@@ -28,12 +28,14 @@ int main()
   init_materials(fuelid, modid);
   initPinCell(pitch, fuelid, modid);
 
-  int batch_size = 1E5;
+  int batch_size = 1E3;
   double En;
+  double xi;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
   double pi = 3.14159265358979;
+  double sourceProb;
   vector<particle*> sourceBank;
 
   // sample neutrons for initial source bank
@@ -62,6 +64,7 @@ int main()
   int k = 0, l = 0, n = 0, fissions;
   particle* neutron;
   vector<particle*> fissionBank;
+  vector<particle*> fissionCopy;
 
   while(k < max_iters){
     k = k+1; // total power iterations 
@@ -85,7 +88,7 @@ int main()
 
     // Calculate Shannon Entropy
     PrevEntropy = ShannonEntropy;
-    //ShannonEntropy = calcEntropy(batch_size,xyz);
+    ShannonEntropy = calcEntropy(fissionBank);
     // some convergence check
     if(converged){
       l = l+1; // power iterations with converged source
@@ -98,24 +101,7 @@ int main()
       }
     }
 
-    // use fission bank to create source bank for next iteration
-    if (fissionBank.size() == batch_size) // Fission bank is correct size
-    {
-      while (!fissionBank.empty())
-      {
-        sourceBank.push_back(fissionBank.back());
-        fissionBank.pop_back();
-      }
-    }
-    else if (fissionBank.size() > batch_size) // Fission bank is too large
-    {
-      //Add neutrons to source bank with probability batch_size/fissionBank.size()
-    }
-    else // fission bank is too small
-    {
-      //Add entire fission bank to source back, and duplicate some of them
-    }
+    makeSource(fissionBank,sourceBank,batch_size);
   }
-
   return 0;
 }
