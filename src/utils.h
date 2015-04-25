@@ -15,6 +15,8 @@ const double nudge = 10.0*eps;
 const double pi = 3.14159265358979;
 const double neut_mass = 939.565378E6; // eV
 const double kB = 8.6173324E-5; // eV K^-1
+const double nu = 2.45; // neutrons per fission
+const double temp = 293; // Kelvin
 
 // Functions
 double drand(void);

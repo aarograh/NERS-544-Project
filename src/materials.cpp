@@ -133,18 +133,20 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, double *frac_
   return;
 }
 
-double fuel::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac)
+int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_frac, double *fiss_frac)
 {
   double sqrE = sqrt(E);
-  if(isotope == 235){
+  double xi = drand();
+  if(xi < *frac_U235){
     macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*exp(fuel_scat[1][2]*sqrE);
     maccap_U235 = fueldens[1]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE);
     macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
 
     *fiss_frac = macfiss_U235/(macscat_U235+maccap_U235+macfiss_U235);
     *abs_frac = (macfiss_U235+maccap_U235)/(macscat_U235+maccap_U235+macfiss_U235);
+    return 235;
   }
-  else if(isotope == 238){
+  else if(xi < *frac_U238){
     // check for proximity to a resonance
     res_xs = 0; 
     for(int j = 0; j < nres; j++){
@@ -159,14 +161,18 @@ double fuel::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac
     
     *fiss_frac = 0;
     *abs_frac = maccap_U238/(maccap_U238+macscat_U238);
+    return 238;
   }
-//  else{
-//    cout << "Undefined fuel isotope. isotope = " << isotope << endl;
-//  }
+  else{ // capture in oxygen
+    *fiss_frac = 0;
+    *abs_frac = 0;
+    return 16;
+  }
 }
 
-void material::elastic(double temp, double A, double *v_n, double *d_n[3])
+void elastic(const double temp, int A_in, double *v_n, double d_n[3])
 {
+  double A = static_cast<double>(A_in);
   double beta = sqrt(neut_mass*A/(2*kB*temp)); 
 
   double x;
@@ -198,20 +204,20 @@ void material::elastic(double temp, double A, double *v_n, double *d_n[3])
   
   // sample direction vector for the target nucleus Omega_T-hat 
   double gamma = 2*pi*drand();
-  double Tx = mutil*(*d_n)[0] + ((*d_n)[0]*(*d_n)[2]*cos(gamma) - (*d_n)[1]*sin(gamma)*sqrt((1-mutil*mutil)/(1-(*d_n)[2]*(*d_n)[2])));
-  double Ty = mutil*(*d_n)[1] + ((*d_n)[1]*(*d_n)[2]*cos(gamma) - (*d_n)[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-(*d_n)[2]*(*d_n)[2])));
-  double Tz = mutil*(*d_n)[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-(*d_n)[2]*(*d_n)[2])); 
+  double Tx = mutil*d_n[0] + (d_n[0]*d_n[2]*cos(gamma) - d_n[1]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
+  double Ty = mutil*d_n[1] + (d_n[1]*d_n[2]*cos(gamma) - d_n[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
+  double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-d_n[2]*d_n[2])); 
 
   // center-of-mass velocity u_xyz
-  double ux = ((*v_n)*(*d_n)[0] + A*Vtil*Tx)/(1+A);  
-  double uy = ((*v_n)*(*d_n)[1] + A*Vtil*Ty)/(1+A);  
-  double uz = ((*v_n)*(*d_n)[2] + A*Vtil*Tz)/(1+A);  
+  double ux = ((*v_n)*d_n[0] + A*Vtil*Tx)/(1+A);  
+  double uy = ((*v_n)*d_n[1] + A*Vtil*Ty)/(1+A);  
+  double uz = ((*v_n)*d_n[2] + A*Vtil*Tz)/(1+A);  
   double uu = sqrt(ux*ux + uy*uy + uz*uz); // center-of-mass speed
 
   // neutron center-of-mass velocity
-  double vcx = (*v_n)*(*d_n)[0] - ux;
-  double vcy = (*v_n)*(*d_n)[1] - uy;
-  double vcz = (*v_n)*(*d_n)[2] - uz;
+  double vcx = (*v_n)*d_n[0] - ux;
+  double vcy = (*v_n)*d_n[1] - uy;
+  double vcz = (*v_n)*d_n[2] - uz;
   double vcn = sqrt(vcx*vcx + vcy*vcy + vcz*vcz);
 
   // neutron center-of-mass direction vector
@@ -231,7 +237,7 @@ void material::elastic(double temp, double A, double *v_n, double *d_n[3])
   double vncy = vcn*ncyp + uy;
   double vncz = vcn*nczp + uz; 
   *v_n = sqrt(vncx*vncx + vncy*vncy + vncz*vncz);
-  (*d_n)[0] = vncx/(*v_n);
-  (*d_n)[1] = vncy/(*v_n);
-  (*d_n)[2] = vncz/(*v_n);
+  d_n[0] = vncx/(*v_n);
+  d_n[1] = vncy/(*v_n);
+  d_n[2] = vncz/(*v_n);
 }

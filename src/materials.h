@@ -6,7 +6,6 @@ class material{
   // arrays for isotopes, routines to get cross sections and calculate interaction stuff
   public:
     int id;
-    void elastic(double,double,double*,double*[]);
 };
 class moderator : public material{
   double moddens[2]; // 0 = H, 1 = O
@@ -36,7 +35,8 @@ class fuel : public material{
   public:
     fuel(int);
     void fuelMacro(double,double*,double*,double*);
-    double sample_U(int,double,double*,double*);
+    int sample_U(double,double*,double*,double*,double*);
 };
 
+void elastic(const double,int,double*,double[3]);
 void init_materials(int& fuelid, int& modid);

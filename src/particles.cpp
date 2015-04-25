@@ -33,13 +33,19 @@ particle::particle(double xyz[3], double gamma, double mu, double E_in,
 int particle::simulate()
 {
   int result, surfid;
+  int isotope;
   const int fuelid = 0; const int modid = 1; // just temporary, need to get these from elsewhere
   double* totalXS;
   double* f235;
   double* f238;
   double* fH;
   double* fcap;
+  double* fiss_frac;
+  double* abs_frac;
+  double vn, xi;
   double dcoll, dsurf, intersection[3], tmp;
+  cell* cellptr;
+  surface* surfptr;
   fuel* thisFuel = new fuel(fuelid);
   moderator* thisMod = new moderator(modid);
 
@@ -49,7 +55,7 @@ std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << o
   {
     // Get pointer to the current cell
     cellptr = getPtr_cell(cellid);
-    switch((*currentCell).id)
+    switch((*cellptr).id)
     {
       case fuelid:
         (*thisFuel).fuelMacro(energy,totalXS,f235,f238);
@@ -57,6 +63,9 @@ std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << o
       case modid:
         (*thisMod).modMacro(energy,totalXS,fH,fcap); 
         break;
+      default:
+        std::cout << "Not fuel or moderator id." << std::endl;
+        exit(-3);
     }
 
     // Get collision distance
@@ -112,7 +121,54 @@ std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
     else
     {
       moveParticle(dcoll);
-      // TODO: sample collision (scatter/capture), score estimator, etc.
+      switch((*cellptr).id)
+      { 
+        case fuelid:
+          isotope = (*thisFuel).sample_U(energy,f235,f238,fiss_frac,abs_frac); 
+          xi = drand();
+          if(xi > *abs_frac) // scatter
+          {
+            elastic(temp,isotope,&vn,omega);
+          }
+          else // absorption
+          {
+            isAlive = false;
+            if(xi > *fiss_frac) // capture, maybe score which isotope
+            {
+              result = 0;
+            }
+            else // fission
+            {
+              result = static_cast<int>(nu+drand());
+            }
+          }
+          break;
+        case modid:
+          if(drand() < *fH) // interaction with hydrogen
+          {
+            if(drand() > *fcap)
+            {  
+              vn = sqrt(2*energy/neut_mass);
+              elastic(temp,1,&vn,omega);
+              energy = (1/2)*neut_mass*vn*vn; 
+            }
+            else // capture; score estimator, end history, etc. 
+            {
+              result = 0;
+              isAlive = false;
+            }
+          }
+          else // interaction with oxygen; all are scatters
+          {
+            vn = sqrt(2*energy/neut_mass);
+            elastic(temp,16,&vn,omega);
+            energy = (1/2)*neut_mass*vn*vn; 
+          }
+          break;
+        default:
+          std::cout << "Not fuel or moderator id." << std::endl;
+          exit(-3);
+      }
     }
   }
 
