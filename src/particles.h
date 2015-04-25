@@ -4,13 +4,13 @@
 
 class particle{
   private:
+    bool isAlive;
     int cellid;
     double position[3];
     double omega[3];
     double energy;
     double weight;
   public:
-    bool isAlive;
     particle(double[3], double, double, double, int);
     int simulate();
 };

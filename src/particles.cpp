@@ -29,25 +29,27 @@ int particle::simulate()
 {
   int result, surfid;
   double dcoll, dsurf, intersection[3], tmp;
-  cell* currentCell;
-  surface* intersectSurface;
+  cell* cellptr;
+  surface* surfptr;
 
   while (isAlive)
   {
-    currentCell = getPtr_cell(cellid);
+    // Get pointer to the current cell
+    cellptr = getPtr_cell(cellid);
     // Get collision distance
     dcoll = 500.0; // Just to test the surface/cell stuff
     // Get closest surface distance
-    dsurf = (*currentCell).distToIntersect(position, omega, intersection, surfid);
+    dsurf = (*cellptr).distToIntersect(position, omega, intersection, surfid);
     // Move particle to surface
     if (dcoll < dsurf)
     {
-      intersectSurface = getPtr_surface(surfid);
-      switch((*intersectSurface).boundaryType)
+      // get pointer to the surface that the particle is colliding with
+      surfptr = getPtr_surface(surfid);
+      switch((*surfptr).boundaryType)
       {
         // Particle hit reflecting boundary
         case reflecting:
-          (*intersectSurface).reflect(intersection, omega);
+          (*surfptr).reflect(intersection, omega);
           break;
         // Particle hit vacuum boundary and escaped
         case vacuum:
@@ -57,7 +59,12 @@ int particle::simulate()
           break;
         // Particle hit interior surface
         case interior:
-          // TODO: nudge particle into surface on other side
+          position[0] += omega[0]*eps;
+          position[1] += omega[1]*eps;
+          position[2] += omega[2]*eps;
+          
+          cellid = getCellID(position);
+          cellptr = getPtr_cell(cellid);
           break;
         default:
           std::cout << "Error in particle::simulate().  Particle encountered " <<
