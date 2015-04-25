@@ -57,7 +57,7 @@ double plane::distToIntersect(double position[3], double direction[3],
   return distance;
 }
 
-//Reflection routine for planar surface
+// Reflection routine for planar surface
 void plane::reflect(double* point_in, double* direction_in)
 {
   double dot_product = direction_in[0]*norm[0] + direction_in[1]*norm[1] +
@@ -72,6 +72,27 @@ void plane::reflect(double* point_in, double* direction_in)
   point_in[2] += direction_in[2]*eps;
 
   return;
+}
+
+// Routine to return the sense of a plane with respect to some point
+int plane::getSense(double* position)
+{
+  double position_vec[3], dotproduct;
+
+  position_vec[0] = position[0] - point[0];
+  position_vec[1] = position[1] - point[1];
+  position_vec[2] = position[2] - point[2];
+
+  dotproduct = position_vec[0]*norm[0] + position_vec[1]*norm[1] +
+    position_vec[2]*norm[2];
+  if (dotproduct > 0)
+  {
+    return 1;
+  }
+  else
+  {
+    return -1;
+  }
 }
 
 // Constructor for cylindrical surface
@@ -258,6 +279,25 @@ void cylinder::reflect(double* point_in, double* direction_in)
   return;
 }
 
+// Routine to return the sense of a cylinder with respect to some point
+int cylinder::getSense(double* position)
+{
+  double shifted[2], d2o;
+
+  shifted[0] = position[0] - origin[0];
+  shifted[1] = position[1] - origin[1];
+
+  d2o = sqrt(shifted[0]*shifted[0] + shifted[1]*shifted[1]);
+  if (d2o > radius)
+  {
+    return 1;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
 // Constructor for cell class
 cell::cell(int cellid, int size, int* surfs, int* sense)
 {
@@ -295,6 +335,16 @@ double cell::distToIntersect(double position[3], double direction[3],
   }
 
   return distance;
+}
+
+cell* getPtr_cell(int cellid)
+{
+  return cellList.at(cellid);
+}
+
+surface* getPtr_surface(int surfid)
+{
+  return surfaceList.at(surfid);
 }
 
 // Function to initialize a pin cell
@@ -337,12 +387,35 @@ void initPinCell(double pitch, int fuelid, int modid)
   return;
 }
 
-cell* getPtr_cell(int cellid)
+int getCellID(double position[3])
 {
-  return cellList.at(cellid);
-}
+  int surfid, j;
+  double senses[surfaceList.size()];
+  cell* cellptr;
+  surface* surfptr;
+  std::fill_n(senses, surfaceList.size(), 0);
 
-surface* getPtr_surface(int surfid)
-{
-  return surfaceList.at(surfid);
+  for (int i = 0; i < cellList.size(); i++)
+  {
+    cellptr = cellList.at(i);
+    for (j = 0; j < (*cellptr).iSurfs.size(); j++)
+    {
+      surfid = (*cellptr).iSurfs[j];
+      surfptr = getPtr_surface(surfid);
+      // Surface has not been checked yet
+      if (senses[surfid] == 0)
+      {
+        senses[surfid] = (*surfptr).getSense(position);
+      }
+      // position is on wrong side of surface
+      else if(!(senses[surfid] == (*cellptr).senses[j]))
+      {
+        break;
+      }
+    }
+    // Checked all surfaces without a break, so return this cell
+    if (j == (*cellptr).iSurfs.size()) return (*cellptr).id;
+  }
+
+  return -1;
 }

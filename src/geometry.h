@@ -11,6 +11,7 @@ class surface{
     int id;
     virtual double distToIntersect(double*, double*, double*) = 0;
     virtual void reflect(double*, double*) = 0;
+    virtual int getSense(double*) = 0;
 };
 
 class plane : public surface{
@@ -20,6 +21,7 @@ class plane : public surface{
     plane(int, double, int, int);
     double distToIntersect(double*, double*, double*);
     void reflect(double*, double*);
+    int getSense(double*);
 };
 
 class cylinder : public surface{
@@ -29,6 +31,7 @@ class cylinder : public surface{
     cylinder(int, double, double, double, double, int);
     double distToIntersect(double*, double*, double*);
     void reflect(double*, double*);
+    int getSense(double*);
 };
 
 class cell{
@@ -41,6 +44,8 @@ class cell{
     double distToIntersect(double[3], double[3], double[3], int);
 };
 
-void initPinCell(double, int, int);
 cell* getPtr_cell(int);
 surface* getPtr_surface(int);
+
+void initPinCell(double, int, int);
+int getCellID(double[3]);
