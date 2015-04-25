@@ -2,11 +2,7 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
-#include<cstdlib>
-#include<limits>
-#include<cmath>
-
-const double eps = std::numeric_limits<double>::epsilon()*100.0;
+#include "utils.h"
 
 // Random number generator on [0,1]
 double drand(void)
