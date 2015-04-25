@@ -15,6 +15,7 @@ class particle{
     double weight;
   public:
     particle(double[3], double, double, double, int);
+    void moveParticle(double);
     double Coordinate(int);
     double Direction(int);
     int simulate();

@@ -34,7 +34,6 @@ int main()
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
-  double pi = 3.14159265358979;
   double sourceProb;
   vector<particle*> sourceBank;
 

@@ -107,6 +107,8 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound
   switch(bound_in)
   {
     case reflecting:
+      // need to do this case
+      break;
     case vacuum:
       boundaryType = bound_in;
       break;

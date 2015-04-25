@@ -33,9 +33,15 @@ particle::particle(double xyz[3], double gamma, double mu, double E_in,
 int particle::simulate()
 {
   int result, surfid;
+  const int fuelid = 0; const int modid = 1; // just temporary, need to get these from elsewhere
+  double* totalXS;
+  double* f235;
+  double* f238;
+  double* fH;
+  double* fcap;
   double dcoll, dsurf, intersection[3], tmp;
-  cell* cellptr;
-  surface* surfptr;
+  fuel* thisFuel = new fuel(fuelid);
+  moderator* thisMod = new moderator(modid);
 
 std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
 std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
@@ -43,8 +49,19 @@ std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << o
   {
     // Get pointer to the current cell
     cellptr = getPtr_cell(cellid);
+    switch((*currentCell).id)
+    {
+      case fuelid:
+        (*thisFuel).fuelMacro(energy,totalXS,f235,f238);
+        break;
+      case modid:
+        (*thisMod).modMacro(energy,totalXS,fH,fcap); 
+        break;
+    }
+
     // Get collision distance
     dcoll = 500.0; // Just to test the surface/cell stuff
+    dcoll = -log(drand())/(*totalXS);
     // Get closest surface distance
     dsurf = (*cellptr).distToIntersect(position, omega, intersection, surfid);
 std::cout << "dcoll=" << dcoll << " dsurf=" << dsurf << " surfid=" << surfid <<  std::endl;
@@ -91,9 +108,11 @@ std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
           exit(-2);
       }
     }
-    // Move particle to collision point and perform calculations
+    // Move particle to collision point and sample collision
     else
     {
+      moveParticle(dcoll);
+      // TODO: sample collision (scatter/capture), score estimator, etc.
     }
   }
 
@@ -110,6 +129,14 @@ double particle::Direction(int index)
   return omega[index];
 }
 
+void particle::moveParticle(double dist)
+{
+  for(int i = 0; i < 3; i++)
+  {
+    position[i] += dist*omega[i];
+  }
+  return;
+}
 particle* fissionNeutron(particle* neutron)
 {
   double tmp[3] = {0.0,0.0,0.0};

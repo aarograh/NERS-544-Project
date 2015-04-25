@@ -92,7 +92,7 @@ void init_materials(int& fuelid, int& modid)
   return;
 }
 
-double moderator::mod_macro(double E, double *totalxs, double *H_frac, double *abs_frac)
+void moderator::modMacro(double E, double *totalxs, double *H_frac, double *abs_frac)
 {
   double sqrE = sqrt(E);
   macabs_H = moddens[0]*mod_cap[1]/sqrE;
@@ -102,9 +102,11 @@ double moderator::mod_macro(double E, double *totalxs, double *H_frac, double *a
   *totalxs = macscat_H+macscat_O+macabs_H;
   *H_frac = (macabs_H+macscat_H)/(*totalxs);
   *abs_frac = macabs_H/(macabs_H+macscat_H);
+
+   return;
 }
 
-double fuel::fuel_macro(double E, double *totalxs, double *frac_U235, double *frac_U238)
+void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, double *frac_U238)
 {
   double sqrE = sqrt(E);
   // check for proximity to a resonance
@@ -127,6 +129,8 @@ double fuel::fuel_macro(double E, double *totalxs, double *frac_U235, double *fr
   *totalxs = macscat_O+macscat_U235+macscat_U238+maccap_U235+maccap_U238;
   *frac_U235 = (macscat_U235+maccap_U235)/(*totalxs);
   *frac_U238 = (macscat_U238+maccap_U238)/(*totalxs);
+
+  return;
 }
 
 double fuel::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac)
@@ -163,9 +167,6 @@ double fuel::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac
 
 void material::elastic(double temp, double A, double *v_n, double *d_n[3])
 {
-  double pi = 3.14159265358979;
-  double neut_mass = 939.565378E6; // eV
-  double kB = 8.6173324E-5; // eV K^-1
   double beta = sqrt(neut_mass*A/(2*kB*temp)); 
 
   double x;

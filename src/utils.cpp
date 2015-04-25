@@ -17,7 +17,6 @@ double Watt(void)
 {
   double a = 0.988; // MeV
   double b = 2.249; // MeV^-1
-  double pi = 3.14159235658979;
 
   double x1 = drand();
   double x2 = drand();

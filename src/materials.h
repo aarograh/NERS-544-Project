@@ -7,7 +7,6 @@ class material{
   public:
     int id;
     void elastic(double,double,double*,double*[]);
-  
 };
 class moderator : public material{
   double moddens[2]; // 0 = H, 1 = O
@@ -15,10 +14,10 @@ class moderator : public material{
   double mod_cap[3]; // H only 
   double macabs_H,macscat_H,macscat_O;
 
-  double mod_macro(double,double*,double*,double*);
 
   public:
     moderator(int);
+    void modMacro(double,double*,double*,double*);
 };
 class fuel : public material{
   int nres;
@@ -33,11 +32,11 @@ class fuel : public material{
   double macscat_U235,macscat_U238,maccap_U235,maccap_U238,macfiss_U235,macscat_O;
   double res_xs, y;
 
-  double fuel_macro(double,double*,double*,double*);
-  double sample_U(int,double,double*,double*);
 
   public:
     fuel(int);
+    void fuelMacro(double,double*,double*,double*);
+    double sample_U(int,double,double*,double*);
 };
 
 void init_materials(int& fuelid, int& modid);

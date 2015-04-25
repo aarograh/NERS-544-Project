@@ -12,6 +12,9 @@
 //Variables
 const double eps = std::numeric_limits<double>::epsilon()*100.0;
 const double nudge = 10.0*eps;
+const double pi = 3.14159265358979;
+const double neut_mass = 939.565378E6; // eV
+const double kB = 8.6173324E-5; // eV K^-1
 
 // Functions
 double drand(void);
