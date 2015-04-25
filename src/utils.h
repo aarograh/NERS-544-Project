@@ -11,6 +11,7 @@
 
 //Variables
 const double eps = std::numeric_limits<double>::epsilon()*100.0;
+const double nudge = 10.0*eps;
 
 // Functions
 double drand(void);
