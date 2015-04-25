@@ -4,7 +4,7 @@
 
 class particle{
   private:
-    int matid;
+    int cellid;
     double position[3];
     double omega[3];
     double energy;
