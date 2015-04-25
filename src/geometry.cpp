@@ -2,18 +2,11 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
-#include<algorithm>
-#include<iostream>
-#include<cstdlib>
-#include<cmath>
 #include "utils.h"
 #include "geometry.h"
 
 std::vector<surface*> surfaceList;
 std::vector<cell*> cellList;
-
-const int xplane = 1, yplane = 2, zplane = 3;
-const int interior = -1, vacuum = 0, reflecting = 1;
 
 // Constructor for plane class
 plane::plane(int surfid, double position, int orientation, int bound_in)
@@ -64,6 +57,23 @@ double plane::distToIntersect(double position[3], double direction[3],
   return distance;
 }
 
+//Reflection routine for planar surface
+void plane::reflect(double* point_in, double* direction_in)
+{
+  double dot_product = direction_in[0]*norm[0] + direction_in[1]*norm[1] +
+    direction_in[2]*norm[2];
+  direction_in[0] -= -2.0*dot_product*norm[0];
+  direction_in[1] -= -2.0*dot_product*norm[1];
+  direction_in[2] -= -2.0*dot_product*norm[2];
+
+  // "Nudge" point into cell
+  point_in[0] += direction_in[0]*eps;
+  point_in[1] += direction_in[1]*eps;
+  point_in[2] += direction_in[2]*eps;
+
+  return;
+}
+
 // Constructor for cylindrical surface
 // It is assumed that the cylinder's axis begins at (0,0,0) and
 // points along the z-axis
@@ -77,11 +87,9 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound
   {
     case reflecting:
     case vacuum:
-      boundary = true;
       boundaryType = bound_in;
       break;
     default:
-      boundary = false;
       boundaryType = -1;
   }
 }
@@ -220,6 +228,36 @@ double cylinder::distToIntersect(double position[3], double direction[3],
   return distance;
 }
 
+//Reflection routine for cylindrical surface
+void cylinder::reflect(double* point_in, double* direction_in)
+{
+  double shifted[3], norm[3];
+
+  // Shift the point of intersection to have a (0,0,0) origin
+  shifted[0] = point_in[0] - origin[0];
+  shifted[1] = point_in[1] - origin[1];
+  shifted[2] = point_in[2] - origin[2];
+
+  // Calculate normal vector at the point
+  norm[0] = cos(shifted[0]/radius);
+  norm[1] = cos(shifted[1]/radius);
+  norm[2] = 0.0; // cylinder assumed to have axis in z-direction
+
+  // Calculate reflection direction
+  double dot_product = direction_in[0]*norm[0] + direction_in[1]*norm[1] +
+    direction_in[2]*norm[2];
+  direction_in[0] -= -2.0*dot_product*norm[0];
+  direction_in[1] -= -2.0*dot_product*norm[1];
+  direction_in[2] -= -2.0*dot_product*norm[2];
+
+  // "Nudge" point into cell
+  point_in[0] += direction_in[0]*eps;
+  point_in[1] += direction_in[1]*eps;
+  point_in[2] += direction_in[2]*eps;
+
+  return;
+}
+
 // Constructor for cell class
 cell::cell(int cellid, int size, int* surfs, int* sense)
 {
@@ -235,7 +273,7 @@ cell::cell(int cellid, int size, int* surfs, int* sense)
 
 // Calculate the distance to the nearest surface for a cell
 double cell::distToIntersect(double position[3], double direction[3],
-  double intersection[3])
+  double intersection[3], int surfIntersect)
 {
   double distance = -1.0;
   int surfid = 0;
@@ -249,7 +287,11 @@ double cell::distToIntersect(double position[3], double direction[3],
     double temp = 
       (*surfaceList.at(surfid)).distToIntersect(position,direction,intersection);
     // If this distance is better than the best so far, assign it
-    if (temp > 0.0 && (temp < distance || distance < 0.0)) distance = temp;
+    if (temp > 0.0 && (temp < distance || distance < 0.0)) 
+    {
+      distance = temp;
+      surfIntersect = surfid;
+    }
   }
 
   return distance;
@@ -293,4 +335,14 @@ void initPinCell(double pitch, int fuelid, int modid)
   }
 
   return;
+}
+
+cell* getPtr_cell(int cellid)
+{
+  return cellList.at(cellid);
+}
+
+surface* getPtr_surface(int surfid)
+{
+  return surfaceList.at(surfid);
 }
