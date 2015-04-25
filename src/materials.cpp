@@ -2,6 +2,10 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
+#include<vector>
+#include<cmath>
+#include<cstdlib>
+#include "materials.h"
 #include "utils.h"
 #include "materials.h"
 
@@ -107,7 +111,7 @@ double fuel::fuel_macro(double E, double *totalxs, double *frac_U235, double *fr
   // check for proximity to a resonance
   res_xs = 0; 
   for(int j = 0; j < nres; j++){
-    if(abs(E-Eres[j]) > dres*rwidth[j]){
+    if(fabs(E-Eres[j]) > dres*rwidth[j]){
       y = (2/rwidth[j])*(E-Eres[j]);
       res_xs = fueldens[2]*U238_res[j]*sqrt(Eres[j]/E)/(1+y*y);
     }
@@ -141,7 +145,7 @@ double fuel::sample_U(int isotope, double E, double *abs_frac, double *fiss_frac
     // check for proximity to a resonance
     res_xs = 0; 
     for(int j = 0; j < nres; j++){
-      if(abs(E-Eres[j]) > dres*rwidth[j]){
+      if(fabs(E-Eres[j]) > dres*rwidth[j]){
         y = (2/rwidth[j])*(E-Eres[j]);
         res_xs = fueldens[2]*U238_res[j]*sqrt(Eres[j]/E)/(1+y*y);
       }

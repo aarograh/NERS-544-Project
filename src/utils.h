@@ -15,7 +15,6 @@ const double eps = std::numeric_limits<double>::epsilon()*100.0;
 // Functions
 double drand(void);
 double Watt(void);
-double calcEntropy(int,double(*)[3]);
 bool approxeq(double,double);
 bool approxge(double,double);
 bool approxle(double,double);
