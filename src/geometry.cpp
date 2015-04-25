@@ -39,7 +39,7 @@ plane::plane(int surfid, double position, int orientation, int bound_in)
 // Function to calculate distance between a plane and a point with an
 // associated direction vector
 double plane::distToIntersect(double position[3], double direction[3],
-    double intersection[3])
+    double* intersection)
 {
   double distance = -1.0;
   // Take dot product of position vector and plane's normal vector
@@ -118,7 +118,7 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound
 // Function to calculate distance between a cylindrical surface and a point
 // with an association direction vector
 double cylinder::distToIntersect(double position[3], double direction[3],
-    double intersection[3])
+    double* intersection)
 {
   double distance = -1.0;
   double incidence = -1.0;
@@ -312,11 +312,11 @@ cell::cell(int cellid, int size, int* surfs, int* sense)
 }
 
 // Calculate the distance to the nearest surface for a cell
-double cell::distToIntersect(double position[3], double direction[3],
-  double intersection[3], int surfIntersect)
+double cell::distToIntersect(double* position, double* direction,
+  double* intersection, int& surfIntersect)
 {
   double distance = -1.0;
-  int surfid = 0;
+  int surfid = -1;
 
   // Loop over surfaces
   for (int i = 0; i < iSurfs.size(); i++)
@@ -387,7 +387,7 @@ void initPinCell(double pitch, int fuelid, int modid)
   return;
 }
 
-int getCellID(double position[3])
+int getCellID(double* position)
 {
   int surfid, j;
   double senses[surfaceList.size()];

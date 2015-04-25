@@ -41,11 +41,11 @@ class cell{
     std::vector<int> senses; // senses for each surface in iSurfs. 1 is +, -1 is -
     int matid;
     cell(int, int, int*, int*);
-    double distToIntersect(double[3], double[3], double[3], int);
+    double distToIntersect(double*, double*, double*, int&);
 };
 
 cell* getPtr_cell(int);
 surface* getPtr_surface(int);
 
 void initPinCell(double, int, int);
-int getCellID(double[3]);
+int getCellID(double*);
