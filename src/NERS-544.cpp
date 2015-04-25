@@ -2,10 +2,6 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
-#include<iostream>
-#include<iomanip>
-#include<cstdlib>
-#include<cmath>
 #include "utils.h"
 #include "particles.h"
 #include "geometry.h"
@@ -26,7 +22,7 @@ int main()
   {
     cout << "Error!  Pin pitch must be greater than pin diameter of 3.0 cm!"
       << endl;
-    return -1;
+    exit(-1);
   }
 
   init_materials(fuelid, modid);
