@@ -44,7 +44,7 @@ int particle::simulate()
   int isotope;
   const int fuelid = 0; const int modid = 1; // just temporary, need to get these from elsewhere
   double vn, xi;
-  double dcoll, dsurf, intersection[3], tmp;
+  double dcoll, dsurf, intersection[3];
   cell* cellptr;
   surface* surfptr;
   fuel* thisFuel = new fuel(fuelid);
@@ -56,7 +56,7 @@ int particle::simulate()
   {
     // Get pointer to the current cell
     cellptr = getPtr_cell(cellid);
-    if((*cellptr).id == fuelid)
+    if((*cellptr).matid == fuelid)
     {
         (*thisFuel).fuelMacro(energy,&totalXS,&f235,&f238);
         std::cout << "Total XS = " << totalXS << std::endl;
@@ -74,7 +74,7 @@ int particle::simulate()
     }
     // get distance to next collision
     //dcoll = 500.0; // Just to test the surface/cell stuff
-    dcoll = -log(drand())/(*totalXS);
+    dcoll = -log(drand())/(totalXS);
     // Get closest surface distance
     dsurf = (*cellptr).distToIntersect(position, omega, intersection, surfid);
 //std::cout << std::endl;
