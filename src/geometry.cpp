@@ -34,6 +34,15 @@ plane::plane(int surfid, double position, int orientation, int bound_in)
       std::cout << "Error when constructing plane!" << std::endl;
       abort();
   }
+  switch(bound_in)
+  {
+    case reflecting:
+    case vacuum:
+      boundaryType = bound_in;
+      break;
+    default:
+      boundaryType = -1;
+  }
 }
 
 // Function to calculate distance between a plane and a point with an
@@ -107,8 +116,6 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound
   switch(bound_in)
   {
     case reflecting:
-      // need to do this case
-      break;
     case vacuum:
       boundaryType = bound_in;
       break;
@@ -358,11 +365,11 @@ void initPinCell(double pitch, int fuelid, int modid)
 
 // Build the fuel pin
   // Construct cylinder for fuel pin
-  surfaceList.push_back(new cylinder(surfaceList.size()+1,0.0,0.0,0.0,1.5,-1));
+  surfaceList.push_back(new cylinder(surfaceList.size(),0.0,0.0,0.0,1.5,-1));
   // Construct top plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,100.0,zplane,0));
+  surfaceList.push_back(new plane(surfaceList.size(),100.0,zplane,0));
   // Construct bottom plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,0.0,zplane,0));
+  surfaceList.push_back(new plane(surfaceList.size(),0.0,zplane,0));
   // Construct the cell
   {
     int isurfs[3] = {0,1,2};
@@ -372,13 +379,13 @@ void initPinCell(double pitch, int fuelid, int modid)
 
 // Construct the "box" for the moderator
   // Construct left plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,-halfpitch,xplane,1));
+  surfaceList.push_back(new plane(surfaceList.size(),-halfpitch,xplane,1));
   // Construct right plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,halfpitch,xplane,1));
+  surfaceList.push_back(new plane(surfaceList.size(),halfpitch,xplane,1));
   // Construct front plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,-halfpitch,yplane,1));
+  surfaceList.push_back(new plane(surfaceList.size(),-halfpitch,yplane,1));
   // Construct back plane
-  surfaceList.push_back(new plane(surfaceList.size()+1,halfpitch,yplane,1));
+  surfaceList.push_back(new plane(surfaceList.size(),halfpitch,yplane,1));
   // Construct the cell
   {
     int isurfs[7] = {0,1,2,3,4,5,6};
