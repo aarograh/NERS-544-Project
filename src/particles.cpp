@@ -50,8 +50,8 @@ int particle::simulate()
   fuel* thisFuel = new fuel(fuelid);
   moderator* thisMod = new moderator(modid);
 
-std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
+//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
+//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
   while (isAlive)
   {
     // Get pointer to the current cell
@@ -72,53 +72,58 @@ std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << o
       std::cout << "Not fuel or moderator id." << std::endl;
       exit(-3);
     }
-
-    // Get collision distance
-    // dcoll = 500.0; // Just to test the surface/cell stuff
-    dcoll = -log(drand())/(totalXS);
+    // get distance to next collision
+    //dcoll = 500.0; // Just to test the surface/cell stuff
+    dcoll = -log(drand())/(*totalXS);
     // Get closest surface distance
     dsurf = (*cellptr).distToIntersect(position, omega, intersection, surfid);
-std::cout << "dcoll=" << dcoll << " dsurf=" << dsurf << " surfid=" << surfid <<  std::endl;
+//std::cout << std::endl;
+//std::cout << "dcoll=" << dcoll << " dsurf=" << dsurf << " surfid=" << surfid <<  std::endl;
     
-    std::cout << "Total XS = " << totalXS << std::endl;
+//    std::cout << "Total XS = " << totalXS << std::endl;
+//std::cout << "intersection=(" << intersection[0] << "," << intersection[1] << "," << intersection[2] << ")\n";
     // Move particle to surface
     if (dsurf < dcoll)
     {
+      // Move particle
+      position[0] = intersection[0];
+      position[1] = intersection[1];
+      position[2] = intersection[2];
       // get pointer to the surface that the particle is colliding with
       surfptr = getPtr_surface(surfid);
       switch((*surfptr).boundaryType)
       {
         // Particle hit reflecting boundary
         case reflecting:
-          position[0] += omega[0]*dsurf;
-          position[1] += omega[1]*dsurf;
-          position[2] += omega[2]*dsurf;
           (*surfptr).reflect(intersection, omega);
+          // Nudge the particle a bit to avoid floating point issues
           position[0] += omega[0]*nudge;
           position[1] += omega[1]*nudge;
           position[2] += omega[2]*nudge;
-std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
+//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
+//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           break;
         // Particle hit vacuum boundary and escaped
         case vacuum:
           // Set return value and "kill" particle
           result = -surfid;
           isAlive = false;
+//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
+//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           break;
         // Particle hit interior surface
         case interior:
-          position[0] += omega[0]*(dsurf + nudge);
-          position[1] += omega[1]*(dsurf + nudge);
-          position[2] += omega[2]*(dsurf + nudge);
-std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
+          position[0] += omega[0]*nudge;
+          position[1] += omega[1]*nudge;
+          position[2] += omega[2]*nudge;
+//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
+//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           
           cellid = getCellID(position);
           cellptr = getPtr_cell(cellid);
           break;
         default:
-std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
+//std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
           std::cout << "Error in particle::simulate().  Particle encountered " <<
             "unknown boundary type." << std::endl;
           exit(-2);
