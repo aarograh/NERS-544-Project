@@ -70,9 +70,9 @@ void plane::reflect(double* point_in, double* direction_in)
 {
   double dot_product = direction_in[0]*norm[0] + direction_in[1]*norm[1] +
     direction_in[2]*norm[2];
-  direction_in[0] -= -2.0*dot_product*norm[0];
-  direction_in[1] -= -2.0*dot_product*norm[1];
-  direction_in[2] -= -2.0*dot_product*norm[2];
+  direction_in[0] -= 2.0*dot_product*norm[0];
+  direction_in[1] -= 2.0*dot_product*norm[1];
+  direction_in[2] -= 2.0*dot_product*norm[2];
 
   // "Nudge" point into cell
   point_in[0] += direction_in[0]*eps;
@@ -275,9 +275,9 @@ void cylinder::reflect(double* point_in, double* direction_in)
   // Calculate reflection direction
   double dot_product = direction_in[0]*norm[0] + direction_in[1]*norm[1] +
     direction_in[2]*norm[2];
-  direction_in[0] -= -2.0*dot_product*norm[0];
-  direction_in[1] -= -2.0*dot_product*norm[1];
-  direction_in[2] -= -2.0*dot_product*norm[2];
+  direction_in[0] -= 2.0*dot_product*norm[0];
+  direction_in[1] -= 2.0*dot_product*norm[1];
+  direction_in[2] -= 2.0*dot_product*norm[2];
 
   // "Nudge" point into cell
   point_in[0] += direction_in[0]*eps;
