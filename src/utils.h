@@ -13,10 +13,11 @@
 const double eps = std::numeric_limits<double>::epsilon()*100.0;
 const double nudge = 10.0*eps;
 const double pi = 3.14159265358979;
-const double neut_mass = 939.565378E6; // eV
-const double kB = 8.6173324E-5; // eV K^-1
+const double neut_mass = 939.565378; // MeV
+const double kB = 8.6173324E-11; // MeV K^-1
 const double nu = 2.45; // neutrons per fission
 const double temp = 293; // Kelvin
+const double lightspeed = 299792458.0; // m/s
 
 // Functions
 double drand(void);

@@ -13,6 +13,13 @@ class particle{
     double omega[3];
     double energy;
     double weight;
+    double totalXS;
+    double f235; 
+    double f238; 
+    double fH; 
+    double fcap; 
+    double fiss_frac; 
+    double abs_frac; 
   public:
     particle(double[3], double, double, double, int);
     void moveParticle(double);

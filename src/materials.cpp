@@ -137,16 +137,18 @@ int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_f
 {
   double sqrE = sqrt(E);
   double xi = drand();
+  std::cout << "U235 fraction: " << *frac_U235 << std::endl;
+  std::cout << "U238 fraction: " << *frac_U238 << std::endl;
   if(xi < *frac_U235){
     macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*exp(fuel_scat[1][2]*sqrE);
-    maccap_U235 = fueldens[1]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE);
+    maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*exp(fuel_cap[0][2]*sqrE);
     macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
 
     *fiss_frac = macfiss_U235/(macscat_U235+maccap_U235+macfiss_U235);
     *abs_frac = (macfiss_U235+maccap_U235)/(macscat_U235+maccap_U235+macfiss_U235);
     return 235;
   }
-  else if(xi < *frac_U238){
+  else if(xi < (*frac_U235+*frac_U238)){
     // check for proximity to a resonance
     res_xs = 0; 
     for(int j = 0; j < nres; j++){
@@ -157,7 +159,7 @@ int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_f
     }
 
     macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*exp(fuel_scat[2][2]*sqrE);
-    maccap_U238 = fueldens[2]*(fuel_cap[2][0]+fuel_cap[2][1]/sqrE)*exp(fuel_cap[2][2]*sqrE)+res_xs;
+    maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE)+res_xs;
     
     *fiss_frac = 0;
     *abs_frac = maccap_U238/(maccap_U238+macscat_U238);
@@ -173,7 +175,14 @@ int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_f
 void elastic(const double temp, int A_in, double *v_n, double d_n[3])
 {
   double A = static_cast<double>(A_in);
-  double beta = sqrt(neut_mass*A/(2*kB*temp)); 
+  double beta = sqrt(neut_mass/(lightspeed*lightspeed)*A/(2*kB*temp)); 
+  std::cout << "beta = " << beta << std::endl;
+
+  std::cout << "temperature = " << temp << std::endl;
+  std::cout << "isotope mass = " << A << std::endl;
+  std::cout << "incoming velocity = " << *v_n << std::endl;
+  std::cout << "directions = " << d_n[0] 
+            << " , " << d_n[1] << " , " << d_n[2] << std::endl;
 
   double x;
   double y = beta*(*v_n);
@@ -196,16 +205,21 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
 
     Vtil = x/beta; 
     mutil = 2*drand() - 1;
+    std::cout << "Vtil = " << Vtil << std::endl;
+    std::cout << "mutil = " << mutil << std::endl;
 
     // check for rejection from scaled f1(V,mu) (Lecture Module 8)
     eta = drand();   
     f1 = sqrt((*v_n)*(*v_n) + Vtil*Vtil - 2*(*v_n)*Vtil*mutil)/((*v_n)+Vtil);
+    std::cout << "f1 = " << f1 << std::endl;
   }
   
+  std::cout << "Vtil = " << Vtil << std::endl;
+  std::cout << "mutil = " << mutil << std::endl;
   // sample direction vector for the target nucleus Omega_T-hat 
   double gamma = 2*pi*drand();
   double Tx = mutil*d_n[0] + (d_n[0]*d_n[2]*cos(gamma) - d_n[1]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
-  double Ty = mutil*d_n[1] + (d_n[1]*d_n[2]*cos(gamma) - d_n[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
+  double Ty = mutil*d_n[1] + (d_n[1]*d_n[2]*cos(gamma) + d_n[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
   double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-d_n[2]*d_n[2])); 
 
   // center-of-mass velocity u_xyz
@@ -229,7 +243,7 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
   gamma = 2*pi*drand();
   double muc = 2*drand() - 1;
   double ncxp = muc*ncx + (ncx*ncz*cos(gamma) - ncy*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
-  double ncyp = muc*ncy + (ncy*ncz*cos(gamma) - ncx*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
+  double ncyp = muc*ncy + (ncy*ncz*cos(gamma) + ncx*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
   double nczp = muc*ncz - cos(gamma)*sqrt((1-muc*muc)*(1-ncz*ncz)); 
 
   // finally, outgoing neutron velocity in lab frame is calculated
@@ -240,4 +254,5 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
   d_n[0] = vncx/(*v_n);
   d_n[1] = vncy/(*v_n);
   d_n[2] = vncz/(*v_n);
+
 }

@@ -27,6 +27,14 @@ particle::particle(double xyz[3], double gamma, double mu, double E_in,
   energy = E_in;
   weight = 1.0;
 
+  totalXS = 0.0;
+  f235 = 0.0;
+  f238 = 0.0;
+  fH = 0.0;
+  fcap = 0.0;
+  fiss_frac = 0.0;
+  abs_frac = 0.0;
+
   return;
 }
 
@@ -35,13 +43,6 @@ int particle::simulate()
   int result, surfid;
   int isotope;
   const int fuelid = 0; const int modid = 1; // just temporary, need to get these from elsewhere
-  double* totalXS;
-  double* f235;
-  double* f238;
-  double* fH;
-  double* fcap;
-  double* fiss_frac;
-  double* abs_frac;
   double vn, xi;
   double dcoll, dsurf, intersection[3], tmp;
   cell* cellptr;
@@ -55,25 +56,31 @@ std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << o
   {
     // Get pointer to the current cell
     cellptr = getPtr_cell(cellid);
-    switch((*cellptr).id)
+    if((*cellptr).id == fuelid)
     {
-      case fuelid:
-        (*thisFuel).fuelMacro(energy,totalXS,f235,f238);
-        break;
-      case modid:
-        (*thisMod).modMacro(energy,totalXS,fH,fcap); 
-        break;
-      default:
-        std::cout << "Not fuel or moderator id." << std::endl;
-        exit(-3);
+        (*thisFuel).fuelMacro(energy,&totalXS,&f235,&f238);
+        std::cout << "Total XS = " << totalXS << std::endl;
+        std::cout << "U235 fraction = " << f235 << std::endl;
+        std::cout << "U238 fraction = " << f238 << std::endl;
+    }
+    else if((*cellptr).id == modid)
+    {
+      (*thisMod).modMacro(energy,&totalXS,&fH,&fcap); 
+    }
+    else
+    {
+      std::cout << "Not fuel or moderator id." << std::endl;
+      exit(-3);
     }
 
     // Get collision distance
-    dcoll = 500.0; // Just to test the surface/cell stuff
-    dcoll = -log(drand())/(*totalXS);
+    // dcoll = 500.0; // Just to test the surface/cell stuff
+    dcoll = -log(drand())/(totalXS);
     // Get closest surface distance
     dsurf = (*cellptr).distToIntersect(position, omega, intersection, surfid);
 std::cout << "dcoll=" << dcoll << " dsurf=" << dsurf << " surfid=" << surfid <<  std::endl;
+    
+    std::cout << "Total XS = " << totalXS << std::endl;
     // Move particle to surface
     if (dsurf < dcoll)
     {
@@ -124,45 +131,63 @@ std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
       switch((*cellptr).id)
       { 
         case fuelid:
-          isotope = (*thisFuel).sample_U(energy,f235,f238,fiss_frac,abs_frac); 
+          std::cout << "Particle in fuel." << std::endl;
+          isotope = (*thisFuel).sample_U(energy,&f235,&f238,&fiss_frac,&abs_frac); 
+          std::cout << "Interaction with isotope " << isotope << std::endl;
           xi = drand();
-          if(xi > *abs_frac) // scatter
+          if(xi > abs_frac) // scatter
           {
+            std::cout << "Particle scattered in fuel." << std::endl;
+            vn = sqrt(2.0*energy/neut_mass)*lightspeed;
+            std::cout << "Incoming particle velocity = " << vn << std::endl;
             elastic(temp,isotope,&vn,omega);
+            energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
+            std::cout << "Outgoing particle velocity = " << vn << std::endl;
+            std::cout << "Outgoing particle energy = " << energy << std::endl;
           }
           else // absorption
           {
             isAlive = false;
-            if(xi > *fiss_frac) // capture, maybe score which isotope
+            if(xi > fiss_frac) // capture, maybe score which isotope
             {
+              std::cout << "Particle was captured in fuel." << std::endl;
               result = 0;
             }
             else // fission
             {
+              std::cout << "Particle fissioned." << std::endl;
               result = static_cast<int>(nu+drand());
             }
           }
           break;
         case modid:
-          if(drand() < *fH) // interaction with hydrogen
+          if(drand() < fH) // interaction with hydrogen
           {
-            if(drand() > *fcap)
+            if(drand() > fcap)
             {  
-              vn = sqrt(2*energy/neut_mass);
+              std::cout << "Particle scattered off hydrogen in moderator." << std::endl;
+              vn = sqrt(2.0*energy/neut_mass)*lightspeed;
+              std::cout << "Incoming particle velocity = " << vn << std::endl;
               elastic(temp,1,&vn,omega);
-              energy = (1/2)*neut_mass*vn*vn; 
+              energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
+              std::cout << "Outgoing particle velocity = " << vn << std::endl;
+              std::cout << "Outgoing particle energy = " << energy << std::endl;
             }
             else // capture; score estimator, end history, etc. 
             {
               result = 0;
+              std::cout << "Particle was captured in moderator." << std::endl;
               isAlive = false;
             }
           }
           else // interaction with oxygen; all are scatters
           {
-            vn = sqrt(2*energy/neut_mass);
+            std::cout << "Particle scattered off oxygen in moderator." << std::endl;
+            vn = sqrt(2.0*energy/neut_mass)*lightspeed;
             elastic(temp,16,&vn,omega);
-            energy = (1/2)*neut_mass*vn*vn; 
+            energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
+            std::cout << "Outgoing particle velocity = " << vn << std::endl;
+            std::cout << "Outgoing particle energy = " << energy << std::endl;
           }
           break;
         default:
@@ -170,6 +195,9 @@ std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
           exit(-3);
       }
     }
+  //  for(int i = 0; i < 500000000; i++)
+  //  {
+  //  }
   }
 
   return result;

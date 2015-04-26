@@ -97,9 +97,12 @@ int main()
       // run some convergence check
       if((ShannonEntropy-PrevEntropy) < tol_entropy){
         converged = true;
+        cout << "The fission source is converged." << endl;
       }
     }
 
+    cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
+    cout << "Making source bank from fission bank..." << endl;
     makeSource(fissionBank,sourceBank,batch_size);
   }
   return 0;
