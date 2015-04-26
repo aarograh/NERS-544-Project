@@ -47,8 +47,7 @@ plane::plane(int surfid, double position, int orientation, int bound_in)
 
 // Function to calculate distance between a plane and a point with an
 // associated direction vector
-double plane::distToIntersect(double position[3], double direction[3],
-    double* intersection)
+double plane::distToIntersect(double position[3], double direction[3])
 {
   double distance = -1.0;
   // Take dot product of position vector and plane's normal vector
@@ -126,11 +125,11 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound
 
 // Function to calculate distance between a cylindrical surface and a point
 // with an association direction vector
-double cylinder::distToIntersect(double position[3], double direction[3],
-    double* intersection)
+double cylinder::distToIntersect(double position[3], double direction[3])
 {
   double distance = -1.0;
   double incidence = -1.0;
+  double intersection[3];
   double x, y, a, b, c, dis, m;
   double xp, xm, yp, ym, d2o, tmp;
 
@@ -334,7 +333,7 @@ double cell::distToIntersect(double* position, double* direction,
     surfid = iSurfs.at(i);
     // Calculate distancce to that surface
     double temp = 
-      (*surfaceList.at(surfid)).distToIntersect(position,direction,intersection);
+      (*surfaceList.at(surfid)).distToIntersect(position,direction);
     // If this distance is better than the best so far, assign it
     if (temp > 0.0 && (temp < distance || distance < 0.0)) 
     {
@@ -343,16 +342,31 @@ double cell::distToIntersect(double* position, double* direction,
     }
   }
 
+  intersection[0] = position[0] + direction[0]*distance;
+  intersection[1] = position[1] + direction[1]*distance;
+  intersection[2] = position[2] + direction[2]*distance;
   return distance;
 }
 
 cell* getPtr_cell(int cellid)
 {
+  if (cellid < 0 || cellid >= cellList.size())
+  {
+    std::cout << "Error returning cell ptr.  Cell id " <<
+      cellid << " is invalid." << std::endl;
+    exit(-4);
+  }
   return cellList.at(cellid);
 }
 
 surface* getPtr_surface(int surfid)
 {
+  if (surfid < 0 || surfid >= surfaceList.size())
+  {
+    std::cout << "Error returning surface ptr.  Surface id " <<
+      surfid << " is invalid." << std::endl;
+    exit(-5);
+  }
   return surfaceList.at(surfid);
 }
 

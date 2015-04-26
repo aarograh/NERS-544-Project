@@ -9,7 +9,7 @@ class surface{
   public:
     int boundaryType;
     int id;
-    virtual double distToIntersect(double*, double*, double*) = 0;
+    virtual double distToIntersect(double*, double*) = 0;
     virtual void reflect(double*, double*) = 0;
     virtual int getSense(double*) = 0;
 };
@@ -19,7 +19,7 @@ class plane : public surface{
     double point[3];
     double norm[3];
     plane(int, double, int, int);
-    double distToIntersect(double*, double*, double*);
+    double distToIntersect(double*, double*);
     void reflect(double*, double*);
     int getSense(double*);
 };
@@ -29,7 +29,7 @@ class cylinder : public surface{
     double origin[3];
     double radius;
     cylinder(int, double, double, double, double, int);
-    double distToIntersect(double*, double*, double*);
+    double distToIntersect(double*, double*);
     void reflect(double*, double*);
     int getSense(double*);
 };
