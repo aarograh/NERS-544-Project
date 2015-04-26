@@ -91,6 +91,16 @@ void init_materials(int& fuelid, int& modid)
   materialList.push_back(new moderator(modid));
   return;
 }
+material* getPtr_material(int matid)
+{
+  if (matid < 0 || matid >= materialList.size())
+  {
+    std::cout << "Error returning material ptr.  Material id " <<
+      matid << " is invalid." << std::endl;
+    exit(-6);
+  }
+  return materialList.at(matid);
+}
 
 void moderator::modMacro(double E, double *totalxs, double *H_frac, double *abs_frac)
 {

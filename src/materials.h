@@ -38,5 +38,6 @@ class fuel : public material{
     int sample_U(double,double*,double*,double*,double*);
 };
 
+material* getPtr_material(int);
 void elastic(const double,int,double*,double[3]);
 void init_materials(int& fuelid, int& modid);
