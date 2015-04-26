@@ -405,15 +405,9 @@ int getCellID(double* position)
       surfid = (*cellptr).iSurfs[j];
       surfptr = getPtr_surface(surfid);
       // Surface has not been checked yet
-      if (senses[surfid] == 0)
-      {
-        senses[surfid] = (*surfptr).getSense(position);
-      }
+      if (senses[surfid] == 0) senses[surfid] = (*surfptr).getSense(position);
       // position is on wrong side of surface
-      else if(!(senses[surfid] == (*cellptr).senses[j]))
-      {
-        break;
-      }
+      if(!(senses[surfid] == (*cellptr).senses[j])) break;
     }
     // Checked all surfaces without a break, so return this cell
     if (j == (*cellptr).iSurfs.size()) return (*cellptr).id;
