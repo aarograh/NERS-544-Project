@@ -23,6 +23,7 @@ class particle{
   public:
     particle(double[3], double, double, double, int);
     void moveParticle(double);
+    int getID(void);
     double Coordinate(int);
     double Direction(int);
     int simulate();

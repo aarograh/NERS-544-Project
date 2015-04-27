@@ -124,6 +124,7 @@ std::cout << "Currently in cell " << cellid << std::endl;
 //std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           
           cellid = getCellID(position);
+//std::cout << "cellid returned from getCellID = " << cellid << std::endl;
           cellptr = getPtr_cell(cellid);
 //std::cout << "cellid = " << cellid << std::endl;
           break;
@@ -213,6 +214,11 @@ std::cout << "Particle was captured in moderator." << std::endl;
   return result;
 }
 
+int particle::getID()
+{
+  return cellid;
+}
+
 double particle::Coordinate(int index)
 {
   return position[index];
@@ -278,6 +284,7 @@ void makeSource(std::vector<particle*> *fissionBank, std::vector<particle*> *sou
         for(int i = 0; i < (*fissionBank).size(); i++)
         {
           (*sourceBank).push_back((*fissionBank).at(i));
+//std::cout << "Cell ID = " << (*(*sourceBank).back()).getID() << std::endl;
         }
       }
       while(!(*fissionBank).empty())
@@ -288,6 +295,7 @@ void makeSource(std::vector<particle*> *fissionBank, std::vector<particle*> *sou
         if(xi < sourceProb)
         {
           (*sourceBank).push_back((*fissionBank).back());
+//std::cout << "Cell ID = " << (*(*sourceBank).back()).getID() << std::endl;
         }
         (*fissionBank).pop_back();
       }

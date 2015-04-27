@@ -63,16 +63,27 @@ int main()
   int k = 0, l = 0, n = 0, fissions;
   particle* neutron;
   vector<particle*> fissionBank;
-  vector<particle*> fissionCopy;
+//  vector<particle*> fissionCopy;
 
   while(k < max_iters){
     k = k+1; // total power iterations 
     
     // inner loop over the source bank
+    for(int i = 0; i < sourceBank.size(); i++)
+    {
+      cout << "Source cellid = " << (*sourceBank.at(i)).getID() << endl;
+    }
     while(!sourceBank.empty())
     {
+//      cout << "Cell id's in source bank: " << endl;
+//      for(int i = 0; i < sourceBank.size(); i++)
+//      {
+//        cout << (*sourceBank.at(i)).getID() << endl;
+//      }
       // Get pointer to particle
       neutron = sourceBank.back();
+      cout << "Starting history in cell " << (*sourceBank.back()).getID() << endl;
+      cout << "Starting history in cell " << (*neutron).getID() << endl;
       // Simulate particle
       fissions = (*neutron).simulate();
       // Create fission neutrons (if fissions > 0)
