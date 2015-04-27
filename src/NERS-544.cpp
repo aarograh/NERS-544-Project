@@ -118,15 +118,13 @@ int main()
         if(result == topSurf)
         { 
           score = neutron.getWeight();
-//          topCurrent = topCurrent + score;
-          topCurrent = topCurrent + 1.0;
+          topCurrent = topCurrent + score;
           topleaksq = topleaksq + score*score;
         }
         else if(result == bottomSurf)
         {
           score = neutron.getWeight();
-//          bottomCurrent = bottomCurrent + score;
-          bottomCurrent = bottomCurrent + 1.0;
+          bottomCurrent = bottomCurrent + score;
           bottomleaksq = bottomleaksq + score*score;
         }
       }
