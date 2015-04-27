@@ -47,10 +47,10 @@ int main()
     // sample a radial location within the fuel cell
     gamma = 2*pi*drand();
     r = pinrad*sqrt(drand());
-    xyz.x = r*cos(gamma);
-    xyz.y = r*sin(gamma);
+    xyz[0] = r*cos(gamma);
+    xyz[1] = r*sin(gamma);
     // sample an axial location
-    xyz.z = 100.0*drand(); 
+    xyz[2] = 100.0*drand(); 
     // sample a direction
     gamma = drand();
     mu = 2.0*drand() - 1.0;

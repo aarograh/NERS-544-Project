@@ -2,9 +2,6 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
-#ifndef UTILS_H
-#define UTILS_H
-
 #include<iostream>
 #include<cstdlib>
 #include<limits>
@@ -28,5 +25,3 @@ double Watt(void);
 bool approxeq(double,double);
 bool approxge(double,double);
 bool approxle(double,double);
-
-#endif

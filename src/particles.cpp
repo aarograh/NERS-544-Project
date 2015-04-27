@@ -282,7 +282,7 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
       {
         for(int i = 0; i < 3; i++)
         {
-          xyz[i] = (fissionBank.back()).Coordinate(i);
+          xyz[i] = (fissionBank.back()).getCoord(i);
         }
         sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
       }
@@ -298,7 +298,7 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
       {
         for(int i = 0; i < 3; i++)
         {
-          xyz[i] = (fissionBank.back()).Coordinate(i);
+          xyz[i] = (fissionBank.back()).getCoord(i);
         }
         sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
 //std::cout << "Cell ID = " << (*sourceBank.back()).getID() << std::endl;
@@ -313,7 +313,7 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
       {
         for(int i = 0; i < 3; i++)
         {
-          xyz[i] = (fissionBank.back()).Coordinate(i);
+          xyz[i] = (fissionBank.back()).getCoord(i);
         }
         sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
 //std::cout << "Cell ID = " << (*sourceBank.back()).getID() << std::endl;

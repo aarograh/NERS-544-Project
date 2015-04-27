@@ -2,8 +2,6 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
 class material{
   // arrays for isotopes, routines to get cross sections and calculate interaction stuff
   public:
@@ -43,4 +41,3 @@ class fuel : public material{
 material* getPtr_material(int);
 void elastic(const double,int,double*,double[3]);
 void init_materials(int& fuelid, int& modid);
-#endif
