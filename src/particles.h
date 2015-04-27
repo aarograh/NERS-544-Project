@@ -28,13 +28,16 @@ class particle{
     double Direction(int);
     int simulate();
 };
-class fission: public particle
-{
+class fission{
+  private:
+    double position[3];
+    int cellid;
   public:
     fission();
     fission(double[3],int);
+    double getCoord(int);
 };
 
 fission fissionNeutron(particle neutron);
-void makeSource(std::vector<fission>,std::vector<particle>,int);
+void makeSource(std::vector<fission>&,std::vector<particle>&,int);
 double calcEntropy(std::vector<fission> fissionBank);

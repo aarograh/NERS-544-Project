@@ -36,7 +36,7 @@ particle::particle(double pos_in[3], double gamma, double mu, double E_in,
   abs_frac = 0.0;
 }
 
-particle::fission()
+fission::fission()
 {
   position[0] = 0.0; 
   position[1] = 0.0; 
@@ -45,7 +45,7 @@ particle::fission()
   cellid = 0;
 }
 
-particle::fission(struct coordinate pos_in, int cellid_in)
+fission::fission(double pos_in[3], int cellid_in)
 {
   position[0] = pos_in[0]; 
   position[1] = pos_in[1]; 
@@ -71,7 +71,7 @@ int particle::simulate()
   while (isAlive)
   {
     // Get pointer to the current cell
-std::cout << "Currently in cell " << cellid << std::endl;
+//std::cout << "Currently in cell " << cellid << std::endl;
     cellptr = getPtr_cell(cellid);
     if((*cellptr).id == fuelid)
     {
@@ -179,12 +179,12 @@ std::cout << "Currently in cell " << cellid << std::endl;
             isAlive = false;
             if(xi > fiss_frac) // capture, maybe score which isotope
             {
-std::cout << "Particle was captured in fuel." << std::endl;
+//std::cout << "Particle was captured in fuel." << std::endl;
               result = 0;
             }
             else // fission
             {
-std::cout << "Particle fissioned." << std::endl;
+//std::cout << "Particle fissioned." << std::endl;
               result = static_cast<int>(nu+drand());
             }
           }
@@ -206,7 +206,7 @@ std::cout << "Particle fissioned." << std::endl;
             else // capture; score estimator, end history, etc. 
             {
               result = 0;
-std::cout << "Particle was captured in moderator." << std::endl;
+//std::cout << "Particle was captured in moderator." << std::endl;
               isAlive = false;
             }
           }
@@ -242,6 +242,11 @@ double particle::getCoord(int index)
   return position[index];
 }
 
+double fission::getCoord(int index)
+{
+  return position[index];
+}
+
 double particle::Direction(int index)
 {
   return omega[index];
@@ -260,7 +265,7 @@ fission fissionNeutron(particle neutron)
   double tmp[3];
   for(int i = 0; i < 3; i++)
   {
-    tmp[i] = neutron.Coordinate(i);
+    tmp[i] = neutron.getCoord(i);
   }
 //  fission fissNeutron = fission(tmp);
 //  return fissNeutron;
@@ -328,11 +333,15 @@ double calcEntropy(std::vector<fission> fissionBank)
 {
   double radius = 1.5;
   int nrad = 10;
-  int nz = 10;
+  int nz = 20;
   int nbins = nz*nrad;
   int particle_mesh[nbins];
   double dz = 100.0/nz;
   double area = radius*radius/nrad; 
+  for(int i = 0; i < nbins; i++)
+  {
+    particle_mesh[i] = 0;
+  }
   
   // bin all of the particles
   // uniform axial bins, equal-area radial bins
@@ -345,7 +354,7 @@ double calcEntropy(std::vector<fission> fissionBank)
     y = fissionBank[i].getCoord(1);
     p_rad = x*x + y*y;
     r_index = (int)(p_rad/area);
-    z_index = (int)fissionBank[i].Coordinate(2)/dz;
+    z_index = (int)fissionBank[i].getCoord(2)/dz;
     particle_mesh[nrad*z_index + nrad] = particle_mesh[nrad*z_index + nrad] + 1;
   }
   // calculate Shannon entropy
@@ -355,7 +364,10 @@ double calcEntropy(std::vector<fission> fissionBank)
     for(int j = 0; j < nrad; j++)
     {
       pn = (double)(particle_mesh[nrad*i + j])/(double)(fissionBank.size());
-      entropy = entropy + pn*log2(pn); 
+      if(pn > 0.0)
+      {
+        entropy = entropy + pn*log2(pn); 
+      }
     }
   }
   entropy = -entropy;

@@ -2,6 +2,8 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
+#include<vector>
+
 const int xplane = 1, yplane = 2, zplane = 3;
 const int interior = -1, vacuum = 0, reflecting = 1;
 

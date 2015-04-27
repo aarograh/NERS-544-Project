@@ -28,7 +28,8 @@ int main()
   init_materials(fuelid, modid);
   initPinCell(pitch, fuelid, modid);
 
-  int batch_size = 1E2;
+  int batch_size = 1E5;
+  int initCycle = 5;
   double En;
   double xi;
 //  double xyz[3];
@@ -59,38 +60,28 @@ int main()
   }
   
   // outer loop over power iterations
-  bool converged = false;
-  double ShannonEntropy = 0.0, PrevEntropy = 0.0;
-  double tol_entropy = 1E-3;
-  const int max_iters = 100, active_iters = 10;
-  int k = 0, l = 0, n = 0, fissions;
+  //bool converged = false;
+  //double tol_entropy = 1E-1;
+  const int max_iters = 100, active_iters = 10, inactive_iters = 30;
+  double ShannonEntropy[max_iters];
+  double totalEntropy = 0.0, meanEntropy = 0.0;
+  int k = 0, l = 0, fissions, ktot = 0;
   particle neutron = sourceBank.back();
 
   while(k < max_iters){
     k = k+1; // total power iterations 
     
     // inner loop over the source bank
-    for(int i = 0; i < sourceBank.size(); i++)
-    {
-      cout << "Source cellid = " << sourceBank[i].getID() << endl;
-    }
     while(!sourceBank.empty())
     {
-//      cout << "Cell id's in source bank: " << endl;
-//      for(int i = 0; i < sourceBank.size(); i++)
-//      {
-//        cout << (*sourceBank.at(i)).getID() << endl;
-//      }
       // Get pointer to particle
       neutron = sourceBank.back();
-      cout << "Starting history in cell " << (sourceBank.back()).getID() << endl;
-      cout << "Starting history in cell " << neutron.getID() << endl;
       // Simulate particle
       fissions = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
       for(int j = 0; j < 3; j++)
       {
-        xyz[j] = neutron.getCoord[j];
+        xyz[j] = neutron.getCoord(j);
       }
       for(int i = 0; i < fissions; i++)
       {
@@ -103,21 +94,31 @@ int main()
     }
 
     // Calculate Shannon Entropy
-    PrevEntropy = ShannonEntropy;
-    ShannonEntropy = calcEntropy(fissionBank);
+    ShannonEntropy[k] = calcEntropy(fissionBank);
     // some convergence check
-    if(converged){
+    // let 5 cycles go by before starting to calculate the mean
+    if(k > inactive_iters)
+    {
+      totalEntropy = totalEntropy + ShannonEntropy[k];
+      meanEntropy = totalEntropy/(double)(k-initCycle);
       l = l+1; // power iterations with converged source
       if (l >= active_iters) break;
     }
-    else{
-      // run some convergence check
-      if((ShannonEntropy-PrevEntropy) < tol_entropy){
-        converged = true;
-        cout << "The fission source is converged." << endl;
-      }
-    }
+//    if(converged){
+//    }
+//    else{
+//      // run some convergence check
+//      if(fabs(ShannonEntropy-PrevEntropy) < tol_entropy){
+//        converged = true;
+//        cout << "The fission source is converged." << endl;
+//      }
+//    }
 
+    cout << "Source iteration: " << k << endl;
+    ktot = ktot + fissionBank.size();
+    cout << "keff estimate = " << (double)(ktot)/(double)(batch_size*k) << endl;
+    cout << "Shannon Entropy: " << ShannonEntropy[k] << endl;
+    cout << "Active cycle: " << l << endl;
     cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
     cout << "Making source bank from fission bank..." << endl;
     makeSource(fissionBank,sourceBank,batch_size);

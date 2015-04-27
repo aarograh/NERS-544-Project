@@ -17,15 +17,15 @@ moderator::moderator(int matid)
   // scattering cross sections
   mod_scat[0][0] = 2.0E+01; 
   mod_scat[0][1] = 3.0E-03; 
-  mod_scat[0][2] = 1.2E+00; 
+  mod_scat[0][2] =-1.2E+00; 
   mod_scat[1][0] = 4.0E+00; 
   mod_scat[1][1] = 1.5E-04; 
   mod_scat[1][2] =-6.0E-01; 
 
   // capture cross sections
   mod_cap[0] = 0.0E+00;
-  mod_cap[0] = 8.0E-05;
-  mod_cap[0] = 0.0E+00;
+  mod_cap[1] = 8.0E-05;
+  mod_cap[2] = 0.0E+00;
 
   // isotope number densities in atoms/(b*cm)
   moddens[0] = 6.6911E-02;
@@ -75,7 +75,7 @@ fuel::fuel(int matid)
   rwidth[1] = 3.0E-08;
   rwidth[2] = 1.0E-07;
   
-  dres = 5; // practical width of resonance, we should play with this parameter
+  dres = 100; // practical width of resonance, we should play with this parameter
 
   // isotope number densities in atoms/(b*cm)
   fueldens[0] = 4.7284E-02;
@@ -123,7 +123,7 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, double *frac_
   res_xs = 0; 
   for(int j = 0; j < nres; j++){
     if(fabs(E-Eres[j]) > dres*rwidth[j]){
-      y = (2/rwidth[j])*(E-Eres[j]);
+      y = (2.0/rwidth[j])*(E-Eres[j]);
       res_xs = fueldens[2]*U238_res[j]*sqrt(Eres[j]/E)/(1+y*y);
     }
   }
@@ -132,12 +132,12 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, double *frac_
   macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*exp(fuel_scat[1][2]*sqrE);
   macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*exp(fuel_scat[2][2]*sqrE);
 
-  maccap_U235 = fueldens[1]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE);
-  maccap_U238 = fueldens[2]*(fuel_cap[2][0]+fuel_cap[2][1]/sqrE)*exp(fuel_cap[2][2]*sqrE)+res_xs;
+  maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*exp(fuel_cap[0][2]*sqrE);
+  maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE)+res_xs;
   macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
 
-  *totalxs = macscat_O+macscat_U235+macscat_U238+maccap_U235+maccap_U238;
-  *frac_U235 = (macscat_U235+maccap_U235)/(*totalxs);
+  *totalxs = macscat_O+macscat_U235+macscat_U238+maccap_U235+maccap_U238+macfiss_U235;
+  *frac_U235 = (macscat_U235+maccap_U235+macfiss_U235)/(*totalxs);
   *frac_U238 = (macscat_U238+maccap_U238)/(*totalxs);
 
   return;
