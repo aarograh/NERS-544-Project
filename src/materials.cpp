@@ -265,3 +265,9 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
   d_n[2] = vncz/(*v_n);
 
 }
+
+double fuel::fissXS(double energy)
+{
+  double sqrE = sqrt(energy); 
+  return fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
+}

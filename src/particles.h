@@ -20,13 +20,17 @@ class particle{
     double fcap; 
     double fiss_frac; 
     double abs_frac; 
+    double estimatorTL;
+    double estimatorColl;
   public:
     particle(double[3], double, double, double, int);
     void moveParticle(double);
-    int getID(void);
+    int getID();
     double getCoord(int);
     double Direction(int);
     int simulate();
+    double getTL();
+    double getColl();
 };
 class fission{
   private:

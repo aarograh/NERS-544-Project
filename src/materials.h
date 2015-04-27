@@ -36,6 +36,7 @@ class fuel : public material{
     fuel(int);
     void fuelMacro(double,double*,double*,double*);
     int sample_U(double,double*,double*,double*,double*);
+    double fissXS(double);
 };
 
 material* getPtr_material(int);

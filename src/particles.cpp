@@ -34,6 +34,8 @@ particle::particle(double pos_in[3], double gamma, double mu, double E_in,
   fcap = 0.0;
   fiss_frac = 0.0;
   abs_frac = 0.0;
+
+  estimatorTL = 0.0;
 }
 
 fission::fission()
@@ -73,16 +75,16 @@ int particle::simulate()
     // Get pointer to the current cell
 //std::cout << "Currently in cell " << cellid << std::endl;
     cellptr = getPtr_cell(cellid);
-    if((*cellptr).id == fuelid)
+    if(cellptr->id == fuelid)
     {
-      (*thisFuel).fuelMacro(energy,&totalXS,&f235,&f238);
+      thisFuel->fuelMacro(energy,&totalXS,&f235,&f238);
 //std::cout << "Total XS = " << totalXS << std::endl;
 //std::cout << "U235 fraction = " << f235 << std::endl;
 //std::cout << "U238 fraction = " << f238 << std::endl;
     }
-    else if((*cellptr).id == modid)
+    else if(cellptr->id == modid)
     {
-      (*thisMod).modMacro(energy,&totalXS,&fH,&fcap); 
+      thisMod->modMacro(energy,&totalXS,&fH,&fcap); 
 //std::cout << "Total XS = " << totalXS << std::endl;
 //std::cout << "Hydrogen fraction = " << fH << std::endl;
 //std::cout << "Capture fraction = " << fcap << std::endl;
@@ -96,7 +98,7 @@ int particle::simulate()
     //dcoll = 500.0; // Just to test the surface/cell stuff
     dcoll = -log(drand())/(totalXS);
     // Get closest surface distance
-    dsurf = (*cellptr).distToIntersect(position, omega, intersection, surfid);
+    dsurf = cellptr->distToIntersect(position, omega, intersection, surfid);
 //std::cout << std::endl;
 //std::cout << "dcoll=" << dcoll << " dsurf=" << dsurf << " surfid=" << surfid <<  std::endl;
     
@@ -105,17 +107,22 @@ int particle::simulate()
     // Move particle to surface
     if (dsurf < dcoll)
     {
+      // tally the track length estimator for keff
+      if(cellptr->id == fuelid)
+      {
+        estimatorTL = estimatorTL + dsurf*weight*nu*(thisFuel->fissXS(energy));
+      }
       // Move particle
       position[0] = intersection[0];
       position[1] = intersection[1];
       position[2] = intersection[2];
       // get pointer to the surface that the particle is colliding with
       surfptr = getPtr_surface(surfid);
-      switch((*surfptr).boundaryType)
+      switch(surfptr->boundaryType)
       {
         // Particle hit reflecting boundary
         case reflecting:
-          (*surfptr).reflect(intersection, omega);
+          surfptr->reflect(intersection, omega);
           // Nudge the particle a bit to avoid floating point issues
           position[0] += omega[0]*nudge;
           position[1] += omega[1]*nudge;
@@ -155,11 +162,17 @@ int particle::simulate()
     else
     {
       moveParticle(dcoll);
-      switch((*cellptr).id)
+      switch(cellptr->id)
       { 
         case fuelid:
 //std::cout << "Particle in fuel." << std::endl;
-          isotope = (*thisFuel).sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
+          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
+          // tally the track length estimator and the collision estimator
+          if(cellptr->id == fuelid)
+          {
+            estimatorTL = estimatorTL + dcoll*weight*(nu*fiss_frac*totalXS);
+            estimatorColl = estimatorColl + weight*nu*fiss_frac;
+          }
 //std::cout << "Interaction with isotope " << isotope << std::endl;
 //std::cout << "Absorption fraction = " << abs_frac << std::endl;
 //std::cout << "Fission fraction = " << fiss_frac << std::endl;
@@ -327,6 +340,16 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
     }
   }
   return;
+}
+
+double particle::getTL(void)
+{
+  return estimatorTL;
+}
+
+double particle::getColl(void)
+{
+  return estimatorColl;
 }
 
 double calcEntropy(std::vector<fission> fissionBank)

@@ -40,6 +40,16 @@ int main()
   vector<particle> sourceBank;
   vector<fission> fissionBank;
   
+  // estimators
+  int topCurrent = 0;
+  int bottomCurrent = 0;
+  int topSurf = -1;
+  int bottomSurf = -2;
+  double tally_TL = 0.0;
+  double tally_coll = 0.0;
+  double keff_TL, keff_Coll;
+
+//  double fuelVolume = pi*pinrad*pinrad*100.0;
 
   // sample neutrons for initial source bank
   for(int i = 0; i < batch_size; i++){
@@ -62,10 +72,10 @@ int main()
   // outer loop over power iterations
   //bool converged = false;
   //double tol_entropy = 1E-1;
-  const int max_iters = 100, active_iters = 10, inactive_iters = 30;
+  const int max_iters = 100, active_iters = 10, inactive_iters = 0;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy = 0.0;
-  int k = 0, l = 0, fissions, ktot = 0;
+  int k = 0, l = 0, result, ktot = 0;
   particle neutron = sourceBank.back();
 
   while(k < max_iters){
@@ -77,16 +87,31 @@ int main()
       // Get pointer to particle
       neutron = sourceBank.back();
       // Simulate particle
-      fissions = neutron.simulate();
+      result = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
-      for(int j = 0; j < 3; j++)
-      {
-        xyz[j] = neutron.getCoord(j);
+      if(result == topSurf)
+      { 
+        topCurrent = topCurrent + 1;
       }
-      for(int i = 0; i < fissions; i++)
+      else if(result == bottomSurf)
       {
-        fissionBank.push_back(fission(xyz,fuelid));
+        bottomCurrent = bottomCurrent + 1;
       }
+      else if(result > 0)
+      { for(int j = 0; j < 3; j++)
+        {
+          xyz[j] = neutron.getCoord(j);
+        }
+        for(int i = 0; i < result; i++)
+        {
+          fissionBank.push_back(fission(xyz,fuelid));
+        }
+      }
+
+      // get keff tallies for the history
+      tally_TL = tally_TL + neutron.getTL();
+      tally_coll = tally_coll + neutron.getColl();
+
       // Delete pointer to neutron in sourcebank;
       //delete sourceBank.back();
       sourceBank.pop_back();
@@ -116,7 +141,11 @@ int main()
 
     cout << "Source iteration: " << k << endl;
     ktot = ktot + fissionBank.size();
-    cout << "keff estimate = " << (double)(ktot)/(double)(batch_size*k) << endl;
+    cout << "rough keff estimate = " << (double)(ktot)/(double)(batch_size*k) << endl;
+    cout << "track length keff estimate = " << tally_TL/(double)(batch_size*(k-inactive_iters)) << endl;
+    cout << "collision keff estimate = " << tally_coll/(double)(batch_size*(k-inactive_iters)) << endl;
+    cout << "Top leakage estimate = " << (double)(topCurrent)/(double)(batch_size*k) << endl;
+    cout << "Bottom leakage estimate = " << (double)(topCurrent)/(double)(batch_size*k) << endl;
     cout << "Shannon Entropy: " << ShannonEntropy[k] << endl;
     cout << "Active cycle: " << l << endl;
     cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
