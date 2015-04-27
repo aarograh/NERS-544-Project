@@ -31,11 +31,14 @@ int main()
   int batch_size = 1E2;
   double En;
   double xi;
-  double xyz[3];
+//  double xyz[3];
+  posit xyz;
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
   double sourceProb;
-  vector<particle*> sourceBank;
+  vector<particle> sourceBank;
+  vector<fission> fissionBank;
+  
 
   // sample neutrons for initial source bank
   for(int i = 0; i < batch_size; i++){
@@ -44,15 +47,15 @@ int main()
     // sample a radial location within the fuel cell
     gamma = 2*pi*drand();
     r = pinrad*sqrt(drand());
-    xyz[0] = r*cos(gamma);
-    xyz[1] = r*sin(gamma);
+    xyz.x = r*cos(gamma);
+    xyz.y = r*sin(gamma);
     // sample an axial location
-    xyz[2] = 100.0*drand(); 
+    xyz.z = 100.0*drand(); 
     // sample a direction
     gamma = drand();
     mu = 2.0*drand() - 1.0;
     // add particle to the bank
-    sourceBank.push_back(new particle(xyz,gamma,mu,En,fuelid));
+    sourceBank.push_back(particle(xyz,gamma,mu,En,fuelid));
   }
   
   // outer loop over power iterations
@@ -61,9 +64,7 @@ int main()
   double tol_entropy = 1E-3;
   const int max_iters = 100, active_iters = 10;
   int k = 0, l = 0, n = 0, fissions;
-  particle* neutron;
-  vector<particle*> fissionBank;
-//  vector<particle*> fissionCopy;
+  particle neutron = sourceBank.back();
 
   while(k < max_iters){
     k = k+1; // total power iterations 
@@ -71,7 +72,7 @@ int main()
     // inner loop over the source bank
     for(int i = 0; i < sourceBank.size(); i++)
     {
-      cout << "Source cellid = " << (*sourceBank.at(i)).getID() << endl;
+      cout << "Source cellid = " << sourceBank[i].getID() << endl;
     }
     while(!sourceBank.empty())
     {
@@ -82,18 +83,20 @@ int main()
 //      }
       // Get pointer to particle
       neutron = sourceBank.back();
-      cout << "Starting history in cell " << (*sourceBank.back()).getID() << endl;
-      cout << "Starting history in cell " << (*neutron).getID() << endl;
+      cout << "Starting history in cell " << (sourceBank.back()).getID() << endl;
+      cout << "Starting history in cell " << neutron.getID() << endl;
       // Simulate particle
-      fissions = (*neutron).simulate();
+      fissions = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
-      for (int i = 0; i < fissions; i++)
+      xyz = neutron.getCoord;
+      for(int i = 0; i < fissions; i++)
       {
-        fissionBank.push_back(fissionNeutron(neutron));
+        fissionBank.push_back(fission(xyz,fuelid));
       }
       // Delete pointer to neutron in sourcebank;
+      //delete sourceBank.back();
       sourceBank.pop_back();
-      delete neutron;
+      //delete neutron;
     }
 
     // Calculate Shannon Entropy
@@ -114,7 +117,7 @@ int main()
 
     cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
     cout << "Making source bank from fission bank..." << endl;
-    makeSource(&fissionBank,&sourceBank,batch_size);
+    makeSource(fissionBank,sourceBank,batch_size);
     cout << "Source bank size = " << sourceBank.size() << endl;
     for(int i = 0; i < 500000000; i++)
     {

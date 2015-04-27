@@ -2,8 +2,8 @@
 // PURPOSE: NERS 544 Course Project
 // DATE   : April 3, 2015
 
-#include "utils.h"
 #include "geometry.h"
+#include "utils.h"
 
 std::vector<surface*> surfaceList;
 std::vector<cell*> cellList;

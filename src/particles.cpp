@@ -10,15 +10,15 @@
 #include "particles.h"
 #include "utils.h"
 
-particle::particle(double xyz[3], double gamma, double mu, double E_in,
+particle::particle(posit pos_in, double gamma, double mu, double E_in,
     int cellid_in)
 {
   cellid = cellid_in;
   isAlive = true;
 
-  position[0] = xyz[0];
-  position[1] = xyz[1];
-  position[2] = xyz[2];
+  position.x = pos_in.x; 
+  position.y = pos_in.y; 
+  position.z = pos_in.z; 
 
   omega[0] = sqrt(1.0 - mu*mu)*cos(gamma);
   omega[1] = sqrt(1.0 - mu*mu)*sin(gamma);
@@ -34,8 +34,24 @@ particle::particle(double xyz[3], double gamma, double mu, double E_in,
   fcap = 0.0;
   fiss_frac = 0.0;
   abs_frac = 0.0;
+}
 
-  return;
+particle::fission()
+{
+  position.x = 0.0; 
+  position.y = 0.0; 
+  position.z = 0.0; 
+  
+  cellid = 0;
+}
+
+particle::fission(struct coordinate pos_in, int cellid_in)
+{
+  position.x = pos_in.x; 
+  position.y = pos_in.y; 
+  position.z = pos_in.z; 
+
+  cellid = cellid_in;
 }
 
 int particle::simulate()
@@ -211,6 +227,8 @@ std::cout << "Particle was captured in moderator." << std::endl;
     }
   }
 
+  delete thisFuel;
+  delete thisMod;
   return result;
 }
 
@@ -219,9 +237,9 @@ int particle::getID()
   return cellid;
 }
 
-double particle::Coordinate(int index)
+posit particle::getCoord(void)
 {
-  return position[index];
+  return position;
 }
 
 double particle::Direction(int index)
@@ -237,74 +255,79 @@ void particle::moveParticle(double dist)
   }
   return;
 }
-particle* fissionNeutron(particle* neutron)
+fission fissionNeutron(particle neutron)
 {
   double tmp[3];
   for(int i = 0; i < 3; i++)
   {
-    tmp[i] = (*neutron).Coordinate(i);
+    tmp[i] = neutron.Coordinate(i);
   }
-  particle* fissNeutron = new particle(tmp,2*pi*drand(),drand(),Watt(),0);
-  return fissNeutron;
+//  fission fissNeutron = fission(tmp);
+//  return fissNeutron;
+  return fission(tmp,0);
 }
 
-void makeSource(std::vector<particle*> *fissionBank, std::vector<particle*> *sourceBank, int batch_size)
+void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &sourceBank, int batch_size)
 {
   double sourceProb, xi;
-  // use fission bank to create source bank for next iteration
-  if ((*fissionBank).size() == batch_size) // Fission bank is correct size
+  posit xyz;
+  if (fissionBank.size() > batch_size) // Fission bank is too large
   {
-    while (!(*fissionBank).empty())
+    //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    while(!fissionBank.empty())
     {
-      (*sourceBank).push_back((*fissionBank).back());
-      (*fissionBank).pop_back();
+      xi = drand(); 
+      sourceProb = static_cast<double>((batch_size-sourceBank.size())/fissionBank.size());
+      if(xi < sourceProb)
+      {
+        xyz = (fissionBank.back()).getCoord();
+//        for(int i = 0; i < 3; i++)
+//        {
+//          xyz[i] = (fissionBank.back()).Coordinate(i);
+//        }
+        sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
+      }
+      fissionBank.pop_back();
     }
   }
-  else
+  else if (fissionBank.size() < batch_size) // Fission bank is too small
   {
-    if ((*fissionBank).size() > batch_size) // Fission bank is too large
+    //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    for(int j = 0; j < (int)(batch_size/fissionBank.size()); j++)
     {
-      //Add neutrons to source bank with probability batch_size/(*fissionBank).size()
-      while(!(*fissionBank).empty())
+      for(int k = 0; k < fissionBank.size(); k++)
       {
-        xi = drand(); 
-        sourceProb = static_cast<double>((batch_size-(*sourceBank).size())/(*fissionBank).size());
-        if(xi < sourceProb)
-        {
-          (*sourceBank).push_back((*fissionBank).back());
-        }
-        (*fissionBank).pop_back();
+        xyz = (fissionBank.back()).getCoord();
+//        for(int i = 0; i < 3; i++)
+//        {
+//          xyz[i] = (fissionBank.back()).Coordinate(i);
+//        }
+        sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
+//std::cout << "Cell ID = " << (*sourceBank.back()).getID() << std::endl;
       }
     }
-    else if ((*fissionBank).size() < batch_size) // Fission bank is too small
+    while(!fissionBank.empty())
     {
-      //Add neutrons to source bank with probability batch_size/(*fissionBank).size()
-      for(int j = 0; j < (int)(batch_size/(*fissionBank).size()); j++)
+      xi = drand(); 
+      sourceProb = static_cast<double>(batch_size-sourceBank.size())/
+                   static_cast<double>(fissionBank.size());
+      if(xi < sourceProb)
       {
-        for(int i = 0; i < (*fissionBank).size(); i++)
-        {
-          (*sourceBank).push_back((*fissionBank).at(i));
-//std::cout << "Cell ID = " << (*(*sourceBank).back()).getID() << std::endl;
-        }
+        xyz = (fissionBank.back()).getCoord();
+//        for(int i = 0; i < 3; i++)
+//        {
+//          xyz[i] = (fissionBank.back()).Coordinate(i);
+//        }
+        sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
+//std::cout << "Cell ID = " << (*sourceBank.back()).getID() << std::endl;
       }
-      while(!(*fissionBank).empty())
-      {
-        xi = drand(); 
-        sourceProb = static_cast<double>(batch_size-(*sourceBank).size())/
-                     static_cast<double>((*fissionBank).size());
-        if(xi < sourceProb)
-        {
-          (*sourceBank).push_back((*fissionBank).back());
-//std::cout << "Cell ID = " << (*(*sourceBank).back()).getID() << std::endl;
-        }
-        (*fissionBank).pop_back();
-      }
+      fissionBank.pop_back();
     }
   }
   return;
 }
 
-double calcEntropy(std::vector<particle*> fissionBank)
+double calcEntropy(std::vector<fission> fissionBank)
 {
   double radius = 1.5;
   int nrad = 10;
@@ -317,14 +340,15 @@ double calcEntropy(std::vector<particle*> fissionBank)
   // bin all of the particles
   // uniform axial bins, equal-area radial bins
   double p_rad, pn;
-  double x, y;
+  posit xyz;
+//  double x, y;
   int z_index, r_index;
   for(int i = 0; i < fissionBank.size(); i++){
-    x = (*fissionBank.at(i)).Coordinate(0);
-    y = (*fissionBank.at(i)).Coordinate(1);
-    p_rad = x*x + y*y; 
+    xyz = fissionBank[i].getCoord();
+    p_rad = xyz.x*xyz.x + xyz.y*xyz.y; 
     r_index = (int)(p_rad/area);
-    z_index = (int)(*fissionBank.at(i)).Coordinate(2)/dz;
+    z_index = (int)(xyz.z/dz);
+//    z_index = (int)fissionBank[i].Coordinate(2)/dz;
     particle_mesh[nrad*z_index + nrad] = particle_mesh[nrad*z_index + nrad] + 1;
   }
   // calculate Shannon entropy
