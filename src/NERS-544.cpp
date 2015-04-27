@@ -28,7 +28,7 @@ int main()
   init_materials(fuelid, modid);
   initPinCell(pitch, fuelid, modid);
 
-  int batch_size = 1E3;
+  int batch_size = 1E2;
   double En;
   double xi;
   double xyz[3];
@@ -103,7 +103,11 @@ int main()
 
     cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
     cout << "Making source bank from fission bank..." << endl;
-    makeSource(fissionBank,sourceBank,batch_size);
+    makeSource(&fissionBank,&sourceBank,batch_size);
+    cout << "Source bank size = " << sourceBank.size() << endl;
+    for(int i = 0; i < 500000000; i++)
+    {
+    }
   }
   return 0;
 }

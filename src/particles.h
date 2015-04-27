@@ -29,5 +29,5 @@ class particle{
 };
 
 particle* fissionNeutron(particle* neutron);
-void makeSource(std::vector<particle*>,std::vector<particle*>,int);
+void makeSource(std::vector<particle*>*,std::vector<particle*>*,int);
 double calcEntropy(std::vector<particle*> fissionBank);

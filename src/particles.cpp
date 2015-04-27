@@ -55,17 +55,21 @@ int particle::simulate()
   while (isAlive)
   {
     // Get pointer to the current cell
+std::cout << "Currently in cell " << cellid << std::endl;
     cellptr = getPtr_cell(cellid);
-    if((*cellptr).matid == fuelid)
+    if((*cellptr).id == fuelid)
     {
-        (*thisFuel).fuelMacro(energy,&totalXS,&f235,&f238);
-        std::cout << "Total XS = " << totalXS << std::endl;
-        std::cout << "U235 fraction = " << f235 << std::endl;
-        std::cout << "U238 fraction = " << f238 << std::endl;
+      (*thisFuel).fuelMacro(energy,&totalXS,&f235,&f238);
+//std::cout << "Total XS = " << totalXS << std::endl;
+//std::cout << "U235 fraction = " << f235 << std::endl;
+//std::cout << "U238 fraction = " << f238 << std::endl;
     }
     else if((*cellptr).id == modid)
     {
       (*thisMod).modMacro(energy,&totalXS,&fH,&fcap); 
+//std::cout << "Total XS = " << totalXS << std::endl;
+//std::cout << "Hydrogen fraction = " << fH << std::endl;
+//std::cout << "Capture fraction = " << fcap << std::endl;
     }
     else
     {
@@ -121,6 +125,7 @@ int particle::simulate()
           
           cellid = getCellID(position);
           cellptr = getPtr_cell(cellid);
+//std::cout << "cellid = " << cellid << std::endl;
           break;
         default:
 //std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
@@ -136,63 +141,66 @@ int particle::simulate()
       switch((*cellptr).id)
       { 
         case fuelid:
-          std::cout << "Particle in fuel." << std::endl;
-          isotope = (*thisFuel).sample_U(energy,&f235,&f238,&fiss_frac,&abs_frac); 
-          std::cout << "Interaction with isotope " << isotope << std::endl;
+//std::cout << "Particle in fuel." << std::endl;
+          isotope = (*thisFuel).sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
+//std::cout << "Interaction with isotope " << isotope << std::endl;
+//std::cout << "Absorption fraction = " << abs_frac << std::endl;
+//std::cout << "Fission fraction = " << fiss_frac << std::endl;
           xi = drand();
           if(xi > abs_frac) // scatter
           {
-            std::cout << "Particle scattered in fuel." << std::endl;
+//std::cout << "Particle scattered in fuel." << std::endl;
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
-            std::cout << "Incoming particle velocity = " << vn << std::endl;
+//std::cout << "Incoming particle velocity = " << vn << std::endl;
             elastic(temp,isotope,&vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
-            std::cout << "Outgoing particle velocity = " << vn << std::endl;
-            std::cout << "Outgoing particle energy = " << energy << std::endl;
+//std::cout << "Outgoing particle velocity = " << vn << std::endl;
+//std::cout << "Outgoing particle energy = " << energy << std::endl;
           }
           else // absorption
           {
             isAlive = false;
             if(xi > fiss_frac) // capture, maybe score which isotope
             {
-              std::cout << "Particle was captured in fuel." << std::endl;
+std::cout << "Particle was captured in fuel." << std::endl;
               result = 0;
             }
             else // fission
             {
-              std::cout << "Particle fissioned." << std::endl;
+std::cout << "Particle fissioned." << std::endl;
               result = static_cast<int>(nu+drand());
             }
           }
           break;
         case modid:
+//std::cout << "Hydrgon XS fraction = " << fH << std::endl;
           if(drand() < fH) // interaction with hydrogen
           {
             if(drand() > fcap)
             {  
-              std::cout << "Particle scattered off hydrogen in moderator." << std::endl;
+//std::cout << "Particle scattered off hydrogen in moderator." << std::endl;
               vn = sqrt(2.0*energy/neut_mass)*lightspeed;
-              std::cout << "Incoming particle velocity = " << vn << std::endl;
+//std::cout << "Incoming particle velocity = " << vn << std::endl;
               elastic(temp,1,&vn,omega);
               energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
-              std::cout << "Outgoing particle velocity = " << vn << std::endl;
-              std::cout << "Outgoing particle energy = " << energy << std::endl;
+//std::cout << "Outgoing particle velocity = " << vn << std::endl;
+//std::cout << "Outgoing particle energy = " << energy << std::endl;
             }
             else // capture; score estimator, end history, etc. 
             {
               result = 0;
-              std::cout << "Particle was captured in moderator." << std::endl;
+std::cout << "Particle was captured in moderator." << std::endl;
               isAlive = false;
             }
           }
           else // interaction with oxygen; all are scatters
           {
-            std::cout << "Particle scattered off oxygen in moderator." << std::endl;
+//std::cout << "Particle scattered off oxygen in moderator." << std::endl;
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
             elastic(temp,16,&vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
-            std::cout << "Outgoing particle velocity = " << vn << std::endl;
-            std::cout << "Outgoing particle energy = " << energy << std::endl;
+//std::cout << "Outgoing particle velocity = " << vn << std::endl;
+//std::cout << "Outgoing particle energy = " << energy << std::endl;
           }
           break;
         default:
@@ -200,9 +208,6 @@ int particle::simulate()
           exit(-3);
       }
     }
-  //  for(int i = 0; i < 500000000; i++)
-  //  {
-  //  }
   }
 
   return result;
@@ -228,55 +233,63 @@ void particle::moveParticle(double dist)
 }
 particle* fissionNeutron(particle* neutron)
 {
-  double tmp[3] = {0.0,0.0,0.0};
-  particle* fissNeutron = new particle(tmp,0.0,1.0,Watt(),1);
+  double tmp[3];
+  for(int i = 0; i < 3; i++)
+  {
+    tmp[i] = (*neutron).Coordinate(i);
+  }
+  particle* fissNeutron = new particle(tmp,2*pi*drand(),drand(),Watt(),0);
   return fissNeutron;
 }
 
-void makeSource(std::vector<particle*> fissionBank, std::vector<particle*> sourceBank, int batch_size)
+void makeSource(std::vector<particle*> *fissionBank, std::vector<particle*> *sourceBank, int batch_size)
 {
   double sourceProb, xi;
   // use fission bank to create source bank for next iteration
-  if (fissionBank.size() == batch_size) // Fission bank is correct size
+  if ((*fissionBank).size() == batch_size) // Fission bank is correct size
   {
-    while (!fissionBank.empty())
+    while (!(*fissionBank).empty())
     {
-      sourceBank.push_back(fissionBank.back());
-      fissionBank.pop_back();
+      (*sourceBank).push_back((*fissionBank).back());
+      (*fissionBank).pop_back();
     }
   }
   else
   {
-    if (fissionBank.size() > batch_size) // Fission bank is too large
+    if ((*fissionBank).size() > batch_size) // Fission bank is too large
     {
-      //Add neutrons to source bank with probability batch_size/fissionBank.size()
-      while(!fissionBank.empty())
+      //Add neutrons to source bank with probability batch_size/(*fissionBank).size()
+      while(!(*fissionBank).empty())
       {
         xi = drand(); 
-        sourceProb = static_cast<double>((batch_size-sourceBank.size())/fissionBank.size());
+        sourceProb = static_cast<double>((batch_size-(*sourceBank).size())/(*fissionBank).size());
         if(xi < sourceProb)
         {
-          sourceBank.push_back(fissionBank.back());
+          (*sourceBank).push_back((*fissionBank).back());
         }
-        fissionBank.pop_back();
+        (*fissionBank).pop_back();
       }
     }
-    else if (fissionBank.size() < batch_size) // Fission bank is too small
+    else if ((*fissionBank).size() < batch_size) // Fission bank is too small
     {
-      //Add neutrons to source bank with probability batch_size/fissionBank.size()
-      while (!fissionBank.empty())
+      //Add neutrons to source bank with probability batch_size/(*fissionBank).size()
+      for(int j = 0; j < (int)(batch_size/(*fissionBank).size()); j++)
       {
-        sourceBank.push_back(fissionBank.back());
+        for(int i = 0; i < (*fissionBank).size(); i++)
+        {
+          (*sourceBank).push_back((*fissionBank).at(i));
+        }
       }
-      while(!fissionBank.empty())
+      while(!(*fissionBank).empty())
       {
         xi = drand(); 
-        sourceProb = static_cast<double>((batch_size-sourceBank.size())/fissionBank.size());
+        sourceProb = static_cast<double>(batch_size-(*sourceBank).size())/
+                     static_cast<double>((*fissionBank).size());
         if(xi < sourceProb)
         {
-          sourceBank.push_back(fissionBank.back());
+          (*sourceBank).push_back((*fissionBank).back());
         }
-        fissionBank.pop_back();
+        (*fissionBank).pop_back();
       }
     }
   }
