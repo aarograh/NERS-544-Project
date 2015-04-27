@@ -12,7 +12,7 @@ class particle{
   private:
     bool isAlive;
     int cellid;
-    posit position;
+    double position[3];
     double omega[3];
     double energy;
     double weight;
@@ -24,10 +24,10 @@ class particle{
     double fiss_frac; 
     double abs_frac; 
   public:
-    particle(posit, double, double, double, int);
+    particle(double[3], double, double, double, int);
     void moveParticle(double);
     int getID(void);
-    posit getCoord(void);
+    double getCoord(int);
     double Direction(int);
     int simulate();
 };
@@ -35,7 +35,7 @@ class fission: public particle
 {
   public:
     fission();
-    fission(posit,int);
+    fission(double[3],int);
 };
 
 fission fissionNeutron(particle neutron);

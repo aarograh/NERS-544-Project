@@ -29,9 +29,4 @@ bool approxeq(double,double);
 bool approxge(double,double);
 bool approxle(double,double);
 
-typedef struct coordinate posit {
-  double x;
-  double y;
-  double z;
-}
 #endif

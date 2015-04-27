@@ -32,7 +32,7 @@ int main()
   double En;
   double xi;
 //  double xyz[3];
-  posit xyz;
+  double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
   double sourceProb;
@@ -88,7 +88,10 @@ int main()
       // Simulate particle
       fissions = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
-      xyz = neutron.getCoord;
+      for(int j = 0; j < 3; j++)
+      {
+        xyz[j] = neutron.getCoord[j];
+      }
       for(int i = 0; i < fissions; i++)
       {
         fissionBank.push_back(fission(xyz,fuelid));
