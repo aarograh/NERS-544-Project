@@ -195,10 +195,9 @@ void elastic(const double temp, int A_in, double &v_n, double d_n[3])
 //std::cout << "directions = " << d_n[0] 
 //          << " , " << d_n[1] << " , " << d_n[2] << std::endl;
 
-  double ztol = 0.99;
   bool transform = false;
   double tmp = d_n[0];
-  if(fabs(d_n[2]) > ztol)
+  if(fabs(1-d_n[2]*d_n[2]) < eps)
   {
     d_n[0] = d_n[2];
     d_n[2] = d_n[1];

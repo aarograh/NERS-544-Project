@@ -74,7 +74,7 @@ int main()
   // outer loop over power iterations
   //bool converged = false;
   //double tol_entropy = 1E-1;
-  const int max_iters = 100, active_iters = 50, inactive_iters = 0;
+  const int max_iters = 100, active_iters = 90, inactive_iters = 10;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy = 0.0;
   int k = 0, l = 0, result, ktot = 0;
