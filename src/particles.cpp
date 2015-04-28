@@ -193,7 +193,7 @@ int particle::simulate()
 //std::cout << "Particle scattered in fuel." << std::endl;
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
 //std::cout << "Incoming particle velocity = " << vn << std::endl;
-            elastic(temp,isotope,&vn,omega);
+            elastic(temp,isotope,vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
 //std::cout << "Outgoing particle velocity = " << vn << std::endl;
 //std::cout << "Outgoing particle energy = " << energy << std::endl;
@@ -222,7 +222,7 @@ int particle::simulate()
 //std::cout << "Particle scattered off hydrogen in moderator." << std::endl;
               vn = sqrt(2.0*energy/neut_mass)*lightspeed;
 //std::cout << "Incoming particle velocity = " << vn << std::endl;
-              elastic(temp,1,&vn,omega);
+              elastic(temp,1,vn,omega);
               energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
 //std::cout << "Outgoing particle velocity = " << vn << std::endl;
 //std::cout << "Outgoing particle energy = " << energy << std::endl;
@@ -238,7 +238,7 @@ int particle::simulate()
           {
 //std::cout << "Particle scattered off oxygen in moderator." << std::endl;
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
-            elastic(temp,16,&vn,omega);
+            elastic(temp,16,vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
 //std::cout << "Outgoing particle velocity = " << vn << std::endl;
 //std::cout << "Outgoing particle energy = " << energy << std::endl;

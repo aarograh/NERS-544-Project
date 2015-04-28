@@ -183,7 +183,7 @@ int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_f
   }
 }
 
-void elastic(const double temp, int A_in, double *v_n, double d_n[3])
+void elastic(const double temp, int A_in, double &v_n, double d_n[3])
 {
   double A = static_cast<double>(A_in);
   double beta = sqrt(neut_mass/(lightspeed*lightspeed)*A/(2*kB*temp)); 
@@ -195,8 +195,20 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
 //std::cout << "directions = " << d_n[0] 
 //          << " , " << d_n[1] << " , " << d_n[2] << std::endl;
 
+  double ztol = 0.99;
+  bool transform = false;
+  double tmp = d_n[0];
+  if(fabs(d_n[2]) > ztol)
+  {
+    d_n[0] = d_n[2];
+    d_n[2] = d_n[1];
+    d_n[1] = tmp;
+  
+    transform = true;
+  }
+
   double x;
-  double y = beta*(*v_n);
+  double y = beta*v_n;
   double w1 = sqrt(pi)*y/(2 + sqrt(pi)*y);
 
   double eta = 1.0;
@@ -221,7 +233,7 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
 
     // check for rejection from scaled f1(V,mu) (Lecture Module 8)
     eta = drand();   
-    f1 = sqrt((*v_n)*(*v_n) + Vtil*Vtil - 2*(*v_n)*Vtil*mutil)/((*v_n)+Vtil);
+    f1 = sqrt(v_n*v_n + Vtil*Vtil - 2*v_n*Vtil*mutil)/(v_n+Vtil);
 //std::cout << "f1 = " << f1 << std::endl;
   }
   
@@ -232,15 +244,15 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
   double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-d_n[2]*d_n[2])); 
 
   // center-of-mass velocity u_xyz
-  double ux = ((*v_n)*d_n[0] + A*Vtil*Tx)/(1+A);  
-  double uy = ((*v_n)*d_n[1] + A*Vtil*Ty)/(1+A);  
-  double uz = ((*v_n)*d_n[2] + A*Vtil*Tz)/(1+A);  
+  double ux = (v_n*d_n[0] + A*Vtil*Tx)/(1+A);  
+  double uy = (v_n*d_n[1] + A*Vtil*Ty)/(1+A);  
+  double uz = (v_n*d_n[2] + A*Vtil*Tz)/(1+A);  
   double uu = sqrt(ux*ux + uy*uy + uz*uz); // center-of-mass speed
 
   // neutron center-of-mass velocity
-  double vcx = (*v_n)*d_n[0] - ux;
-  double vcy = (*v_n)*d_n[1] - uy;
-  double vcz = (*v_n)*d_n[2] - uz;
+  double vcx = v_n*d_n[0] - ux;
+  double vcy = v_n*d_n[1] - uy;
+  double vcz = v_n*d_n[2] - uz;
   double vcn = sqrt(vcx*vcx + vcy*vcy + vcz*vcz);
 
   // neutron center-of-mass direction vector
@@ -259,11 +271,19 @@ void elastic(const double temp, int A_in, double *v_n, double d_n[3])
   double vncx = vcn*ncxp + ux;
   double vncy = vcn*ncyp + uy;
   double vncz = vcn*nczp + uz; 
-  *v_n = sqrt(vncx*vncx + vncy*vncy + vncz*vncz);
-  d_n[0] = vncx/(*v_n);
-  d_n[1] = vncy/(*v_n);
-  d_n[2] = vncz/(*v_n);
+  v_n = sqrt(vncx*vncx + vncy*vncy + vncz*vncz);
+  d_n[0] = vncx/v_n;
+  d_n[1] = vncy/v_n;
+  d_n[2] = vncz/v_n;
 
+  if(transform)
+  {
+    tmp = d_n[2];
+    d_n[2] = d_n[0];
+    d_n[0] = d_n[1];
+    d_n[1] = tmp;
+  }
+  return;
 }
 
 double fuel::fissXS(double energy)
