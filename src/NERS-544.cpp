@@ -41,13 +41,13 @@ int main()
   vector<fission> fissionBank;
   
   // estimators
-  int topCurrent = 0;
-  int bottomCurrent = 0;
+  double topCurrent = 0.0, bottomCurrent = 0.0;
   int topSurf = -1;
   int bottomSurf = -2;
-  double tally_TL = 0.0;
-  double tally_coll = 0.0;
-  double keff_TL, keff_Coll;
+  double tally_TL = 0.0, tally_TLsq = 0.0;
+  double tally_coll = 0.0, tally_collsq = 0.0, topleaksq = 0.0, bottomleaksq = 0.0;
+  double keff_TL, keff_Coll, sigTL, sigColl, active_particles;
+  double topleak, bottomleak, sigtop, sigbottom, score = 0.0;
 
 //  double fuelVolume = pi*pinrad*pinrad*100.0;
 
@@ -72,7 +72,7 @@ int main()
   // outer loop over power iterations
   //bool converged = false;
   //double tol_entropy = 1E-1;
-  const int max_iters = 100, active_iters = 10, inactive_iters = 0;
+  const int max_iters = 100, active_iters = 50, inactive_iters = 0;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy = 0.0;
   int k = 0, l = 0, result, ktot = 0;
@@ -89,15 +89,7 @@ int main()
       // Simulate particle
       result = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
-      if(result == topSurf)
-      { 
-        topCurrent = topCurrent + 1;
-      }
-      else if(result == bottomSurf)
-      {
-        bottomCurrent = bottomCurrent + 1;
-      }
-      else if(result > 0)
+      if(result > 0)
       { for(int j = 0; j < 3; j++)
         {
           xyz[j] = neutron.getCoord(j);
@@ -109,9 +101,26 @@ int main()
       }
 
       // get keff tallies for the history
-      tally_TL = tally_TL + neutron.getTL();
-      tally_coll = tally_coll + neutron.getColl();
+      if(k > inactive_iters)
+      {
+        tally_TL = tally_TL + neutron.getTL();
+        tally_coll = tally_coll + neutron.getColl();
+        tally_TLsq = tally_TLsq + neutron.getTLsq();
+        tally_collsq = tally_collsq + neutron.getCollsq();
 
+        if(result == topSurf)
+        { 
+          score = neutron.getWeight();
+          topCurrent = topCurrent + score;
+          topleaksq = topleaksq + score*score;
+        }
+        else if(result == bottomSurf)
+        {
+          score = neutron.getWeight();
+          bottomCurrent = bottomCurrent + score;
+          bottomleaksq = bottomleaksq + score*score;
+        }
+      }
       // Delete pointer to neutron in sourcebank;
       //delete sourceBank.back();
       sourceBank.pop_back();
@@ -129,32 +138,33 @@ int main()
       l = l+1; // power iterations with converged source
       if (l >= active_iters) break;
     }
-//    if(converged){
-//    }
-//    else{
-//      // run some convergence check
-//      if(fabs(ShannonEntropy-PrevEntropy) < tol_entropy){
-//        converged = true;
-//        cout << "The fission source is converged." << endl;
-//      }
-//    }
+
+    active_particles = static_cast<double>(batch_size*(k-inactive_iters));
+    keff_TL = tally_TL/active_particles;
+    sigTL = sqrt((tally_TLsq/active_particles - keff_TL*keff_TL)/active_particles);
+    keff_Coll = tally_coll/active_particles;
+    sigColl = sqrt((tally_collsq/active_particles - keff_Coll*keff_Coll)/active_particles);
+    topleak = (double)(topCurrent)/active_particles;
+    sigtop = sqrt((topleaksq/active_particles - topleak*topleak)/active_particles);
+    bottomleak = (double)(bottomCurrent)/active_particles;
+    sigbottom = sqrt((bottomleaksq/active_particles - bottomleak*bottomleak)/active_particles);
 
     cout << "Source iteration: " << k << endl;
     ktot = ktot + fissionBank.size();
     cout << "rough keff estimate = " << (double)(ktot)/(double)(batch_size*k) << endl;
-    cout << "track length keff estimate = " << tally_TL/(double)(batch_size*(k-inactive_iters)) << endl;
-    cout << "collision keff estimate = " << tally_coll/(double)(batch_size*(k-inactive_iters)) << endl;
-    cout << "Top leakage estimate = " << (double)(topCurrent)/(double)(batch_size*k) << endl;
-    cout << "Bottom leakage estimate = " << (double)(topCurrent)/(double)(batch_size*k) << endl;
+    cout << "track length keff estimate = " << keff_TL << ", uncertainty = " << sigTL << endl;
+    cout << "collision keff estimate = " << keff_Coll << ", unceratainty = " << sigColl << endl;
+    cout << "Top leakage estimate = " << topleak << ", uncertainty = " << sigtop << endl;
+    cout << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " << sigbottom << endl;
     cout << "Shannon Entropy: " << ShannonEntropy[k] << endl;
     cout << "Active cycle: " << l << endl;
     cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
     cout << "Making source bank from fission bank..." << endl;
     makeSource(fissionBank,sourceBank,batch_size);
     cout << "Source bank size = " << sourceBank.size() << endl;
-    for(int i = 0; i < 500000000; i++)
-    {
-    }
+    //for(int i = 0; i < 800000000; i++)
+    //{
+    //}
   }
   return 0;
 }

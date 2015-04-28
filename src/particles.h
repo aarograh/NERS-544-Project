@@ -13,15 +13,9 @@ class particle{
     double omega[3];
     double energy;
     double weight;
-    double totalXS;
-    double f235; 
-    double f238; 
-    double fH; 
-    double fcap; 
-    double fiss_frac; 
-    double abs_frac; 
-    double estimatorTL;
-    double estimatorColl;
+    double totalXS,f235,f238,fH,fcap,fiss_frac,abs_frac;
+    double estimatorTL,squareTL,estimatorColl,squareColl,score;;
+  
   public:
     particle(double[3], double, double, double, int);
     void moveParticle(double);
@@ -31,6 +25,9 @@ class particle{
     int simulate();
     double getTL();
     double getColl();
+    double getTLsq();
+    double getCollsq();
+    double getWeight();
 };
 class fission{
   private:

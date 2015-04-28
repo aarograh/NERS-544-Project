@@ -35,7 +35,11 @@ particle::particle(double pos_in[3], double gamma, double mu, double E_in,
   fiss_frac = 0.0;
   abs_frac = 0.0;
 
+  score = 0.0;
   estimatorTL = 0.0;
+  squareTL = 0.0;
+  estimatorColl = 0.0;
+  squareColl = 0.0;
 }
 
 fission::fission()
@@ -110,7 +114,10 @@ int particle::simulate()
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
-        estimatorTL = estimatorTL + dsurf*weight*nu*(thisFuel->fissXS(energy));
+        score = dsurf*weight*nu*(thisFuel->fissXS(energy));
+        estimatorTL = estimatorTL + score;
+        squareTL = squareTL + score*score;
+        
       }
       // Move particle
       position[0] = intersection[0];
@@ -170,8 +177,12 @@ int particle::simulate()
           // tally the track length estimator and the collision estimator
           if(cellptr->id == fuelid)
           {
-            estimatorTL = estimatorTL + dcoll*weight*(nu*fiss_frac*totalXS);
-            estimatorColl = estimatorColl + weight*nu*fiss_frac;
+            score = dcoll*weight*nu*fiss_frac*totalXS;
+            estimatorTL = estimatorTL + score;
+            squareTL = squareTL + score*score;
+            score = weight*nu*fiss_frac;
+            estimatorColl = estimatorColl + score;
+            squareColl = squareColl + score*score;
           }
 //std::cout << "Interaction with isotope " << isotope << std::endl;
 //std::cout << "Absorption fraction = " << abs_frac << std::endl;
@@ -350,6 +361,21 @@ double particle::getTL(void)
 double particle::getColl(void)
 {
   return estimatorColl;
+}
+
+double particle::getTLsq(void)
+{
+  return squareTL;
+}
+
+double particle::getCollsq(void)
+{
+  return squareColl;
+}
+
+double particle::getWeight(void)
+{
+  return weight;
 }
 
 double calcEntropy(std::vector<fission> fissionBank)
