@@ -17,6 +17,8 @@ class particle{
   
   public:
     particle(const double[3], double, double, double, int);
+    particle(double[3], double, double, double, int);
+    double getCoord(int);
     int simulate();
     double weight;
     double estimatorTL,squareTL,estimatorColl,squareColl;
