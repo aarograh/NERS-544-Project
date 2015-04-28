@@ -85,11 +85,7 @@ int main()
       result = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
       if(result > 0)
-      {
-        for(int j = 0; j < 3; j++)
-        {
-          xyz[j] = neutron.getCoord(j);
-        }
+      { 
         for(int i = 0; i < result; i++)
         {
           fissionBank.push_back(fission(neutron,fuelid));
