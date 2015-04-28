@@ -91,6 +91,11 @@ int main()
         }
         for(int i = 0; i < result; i++)
         {
+if (fissionBank.size() == 29923)
+{
+  cout << "Wait here" << endl;
+// Neutron is getting outside the box somehow.  Need to understand what's happening there.
+}
           fissionBank.push_back(fission(neutron,fuelid));
         }
       }
