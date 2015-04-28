@@ -313,7 +313,7 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
         {
           xyz[i] = (fissionBank.back()).getCoord(i);
         }
-        sourceBank.push_back(particle(xyz,2*pi*drand(),drand(),Watt(),0));
+        sourceBank.push_back(particle(xyz,2*pi*drand(),2*drand()-1,Watt(),0));
       }
       fissionBank.pop_back();
     }

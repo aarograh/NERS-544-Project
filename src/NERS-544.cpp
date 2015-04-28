@@ -49,7 +49,7 @@ int main()
   double keff_TL, keff_Coll, sigTL, sigColl, active_particles;
   double topleak, bottomleak, sigtop, sigbottom, score = 0.0;
 
-  int fissionMesh[10];
+  //int fissionMesh[10];
 
 //  double fuelVolume = pi*pinrad*pinrad*100.0;
 
@@ -82,10 +82,10 @@ int main()
 
   while(k < max_iters){
     k = k+1; // total power iterations 
-    for(int i = 0; i < 10; i++)
-    {
-      fissionMesh[i] = 0;
-    }
+    //for(int i = 0; i < 10; i++)
+    //{
+    //  fissionMesh[i] = 0;
+    //}
     
     // inner loop over the source bank
     while(!sourceBank.empty())
@@ -100,7 +100,7 @@ int main()
         {
           xyz[j] = neutron.getCoord(j);
         }
-        fissionMesh[(int)(10.0*xyz[2]/100.0)] += 1;
+        //fissionMesh[(int)(10.0*xyz[2]/100.0)] += 1;
         for(int i = 0; i < result; i++)
         {
           fissionBank.push_back(fission(xyz,fuelid));
@@ -170,11 +170,11 @@ int main()
     makeSource(fissionBank,sourceBank,batch_size);
     cout << "Source bank size = " << sourceBank.size() << endl;
 
-    cout << "Fission mesh: " << endl;
-    for(int i = 0; i < 10; i++)
-    {
-      cout << fissionMesh[i] << endl;
-    } 
+    //cout << "Fission mesh: " << endl;
+    //for(int i = 0; i < 10; i++)
+    //{
+    //  cout << fissionMesh[i] << endl;
+    //} 
     ///for(int i = 0; i < 800000000; i++)
     //{
     //}
