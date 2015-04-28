@@ -197,7 +197,7 @@ void elastic(const double temp, int A_in, double &v_n, double d_n[3])
 
   bool transform = false;
   double tmp = d_n[0];
-  if(fabs(1-d_n[2]*d_n[2]) < eps)
+  if(fabs(1-d_n[2]) < eps)
   {
     d_n[0] = d_n[2];
     d_n[2] = d_n[1];

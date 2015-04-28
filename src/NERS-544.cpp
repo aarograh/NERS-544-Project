@@ -29,7 +29,6 @@ int main()
   initPinCell(pitch, fuelid, modid);
 
   int batch_size = 1E5;
-  int initCycle = 5;
   double En;
   double xi;
 //  double xyz[3];
@@ -141,7 +140,7 @@ int main()
     if(k > inactive_iters)
     {
       totalEntropy = totalEntropy + ShannonEntropy[k];
-      meanEntropy = totalEntropy/(double)(k-initCycle);
+      meanEntropy = totalEntropy/(double)(k-inactive_iters);
       l = l+1; // power iterations with converged source
       if (l >= active_iters) break;
     }
