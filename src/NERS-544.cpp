@@ -11,7 +11,8 @@ using namespace std;
 
 int main()
 {
-  srand(time(NULL));
+//  srand(time(NULL));
+  srand(10);
 
   int fuelid, modid;
   double pitch;
@@ -73,7 +74,7 @@ int main()
   // outer loop over power iterations
   //bool converged = false;
   //double tol_entropy = 1E-1;
-  const int max_iters = 100, active_iters = 90, inactive_iters = 10;
+  const int max_iters = 100, active_iters = 80, inactive_iters = 20;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy = 0.0;
   int k = 0, l = 0, result, ktot = 0;
