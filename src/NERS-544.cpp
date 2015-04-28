@@ -49,6 +49,8 @@ int main()
   double keff_TL, keff_Coll, sigTL, sigColl, active_particles;
   double topleak, bottomleak, sigtop, sigbottom, score = 0.0;
 
+  int fissionMesh[10];
+
 //  double fuelVolume = pi*pinrad*pinrad*100.0;
 
   // sample neutrons for initial source bank
@@ -80,6 +82,10 @@ int main()
 
   while(k < max_iters){
     k = k+1; // total power iterations 
+    for(int i = 0; i < 10; i++)
+    {
+      fissionMesh[i] = 0;
+    }
     
     // inner loop over the source bank
     while(!sourceBank.empty())
@@ -94,6 +100,7 @@ int main()
         {
           xyz[j] = neutron.getCoord(j);
         }
+        fissionMesh[(int)(10.0*xyz[2]/100.0)] += 1;
         for(int i = 0; i < result; i++)
         {
           fissionBank.push_back(fission(xyz,fuelid));
@@ -111,13 +118,15 @@ int main()
         if(result == topSurf)
         { 
           score = neutron.getWeight();
-          topCurrent = topCurrent + score;
+//          topCurrent = topCurrent + score;
+          topCurrent = topCurrent + 1.0;
           topleaksq = topleaksq + score*score;
         }
         else if(result == bottomSurf)
         {
           score = neutron.getWeight();
-          bottomCurrent = bottomCurrent + score;
+//          bottomCurrent = bottomCurrent + score;
+          bottomCurrent = bottomCurrent + 1.0;
           bottomleaksq = bottomleaksq + score*score;
         }
       }
@@ -144,9 +153,9 @@ int main()
     sigTL = sqrt((tally_TLsq/active_particles - keff_TL*keff_TL)/active_particles);
     keff_Coll = tally_coll/active_particles;
     sigColl = sqrt((tally_collsq/active_particles - keff_Coll*keff_Coll)/active_particles);
-    topleak = (double)(topCurrent)/active_particles;
+    topleak = topCurrent/active_particles;
     sigtop = sqrt((topleaksq/active_particles - topleak*topleak)/active_particles);
-    bottomleak = (double)(bottomCurrent)/active_particles;
+    bottomleak = bottomCurrent/active_particles;
     sigbottom = sqrt((bottomleaksq/active_particles - bottomleak*bottomleak)/active_particles);
 
     cout << "Source iteration: " << k << endl;
@@ -162,7 +171,13 @@ int main()
     cout << "Making source bank from fission bank..." << endl;
     makeSource(fissionBank,sourceBank,batch_size);
     cout << "Source bank size = " << sourceBank.size() << endl;
-    //for(int i = 0; i < 800000000; i++)
+
+    cout << "Fission mesh: " << endl;
+    for(int i = 0; i < 10; i++)
+    {
+      cout << fissionMesh[i] << endl;
+    } 
+    ///for(int i = 0; i < 800000000; i++)
     //{
     //}
   }
