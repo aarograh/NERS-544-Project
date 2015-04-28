@@ -31,7 +31,6 @@ int main()
 
   int batch_size = 1E5;
   double En;
-  double xi;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
@@ -88,6 +87,11 @@ int main()
       { 
         for(int i = 0; i < result; i++)
         {
+if (fissionBank.size() == 29923)
+{
+  cout << "Wait here" << endl;
+// Neutron is getting outside the box somehow.  Need to understand what's happening there.
+}
           fissionBank.push_back(fission(neutron,fuelid));
         }
       }
