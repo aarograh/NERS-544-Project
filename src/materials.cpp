@@ -252,15 +252,16 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   double beta = sqrt(neut_mass/(lightspeed*lightspeed)*A/(2*kB*T)); 
 
 
-  bool transform = false;
+  bool transform1= false;
+  bool transform2= false;
   double tmp = d_n[0];
-  if(fabs(1-d_n[2]) < eps)
+  if(fabs(1-d_n[2]) < nudge)
   {
     d_n[0] = d_n[2];
     d_n[2] = d_n[1];
     d_n[1] = tmp;
   
-    transform = true;
+    transform1 = true;
   }
 
   double x;
@@ -314,6 +315,16 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   double ncy = vcy/vcn;
   double ncz = vcz/vcn;
 
+  if(fabs(1-ncz) < nudge)
+  {
+    tmp = ncx;
+    ncx = ncz;
+    ncz = ncy;
+    ncy = tmp;
+
+    transform2 = true;
+  }
+
   // outgoing neutron center-of-mass direction 
   gamma = 2*pi*drand();
   double muc = 2*drand() - 1;
@@ -322,6 +333,14 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   double ncyp = muc*ncy + (ncy*ncz*cos(gamma) + ncx*sin(gamma))*
     sqrt((1-muc*muc)/(1-ncz*ncz)); 
   double nczp = muc*ncz - cos(gamma)*sqrt((1-muc*muc)*(1-ncz*ncz)); 
+
+  if(transform2)
+  {
+    tmp = ncz;
+    ncz = ncx;
+    ncx = ncy;
+    ncy = tmp;
+  }
 
   // finally, outgoing neutron velocity in lab frame is calculated
   double vncx = vcn*ncxp + ux;
@@ -332,7 +351,7 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   d_n[1] = vncy/v_n;
   d_n[2] = vncz/v_n;
 
-  if(transform)
+  if(transform1)
   {
     tmp = d_n[2];
     d_n[2] = d_n[0];

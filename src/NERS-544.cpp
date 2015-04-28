@@ -171,5 +171,6 @@ int main()
     makeSource(fissionBank,sourceBank,batch_size);
     cout << "Source bank size = " << sourceBank.size() << endl << endl;
   }
+  cout << "The pin pitch was " << pitch << endl;
   return 0;
 }
