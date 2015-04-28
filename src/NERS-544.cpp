@@ -31,6 +31,7 @@ int main()
 
   int batch_size = 1E5;
   double En;
+  double xi;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
   double r, gamma, mu;
@@ -66,7 +67,7 @@ int main()
   }
   
   // outer loop over power iterations
-  const int max_iters = 100, active_iters = 20, inactive_iters = 80;
+  const int max_iters = 100, active_iters = 80, inactive_iters = 20;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy;
   int k = 0, l = 0, result, ktot = 0;
