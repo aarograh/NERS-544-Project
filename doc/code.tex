@@ -36,6 +36,20 @@ The header file is found in Appendix C, and the source file in Appendix D.
 
 \subsection{Materials}\label{ss:materials}
 
+This module contains definitions for the \textit{moderator} and \textit{fuel} classes.  While these classes technically share a superclass \textit{material}, it ended up being simpler for them to be mostly separate.
+
+The \textit{moderator} class contains variables for the oxygen and hydrogen number densities and cross-section (scattering and aborption) parameters.  It also has a function \textit{void modMacro(double, double*, double*, double*)} which, given an energy, returns the total cross-section, the probability of interaction with hydrogen, and the total absorption probability.  These are used to correctly move particles around and perform the interaction physics in the moderator.
+
+The \textit{fuel} class has similar information, but for oxygen, U-235, and U-238.  It also contains fission cross-section and resonance information, which the \textit{moderator} class does not require.  This class has three main methods defined:
+
+\begin{itemize}
+\item \textit{void fuelMacro(double, double*, double*, double*)} -- Similar to its \textit{moderator} counterpart, it returns the total cross-section and other information about interaction probabilities.
+\item \textit{int sample{\_}U(double, double*, double*, double*, double*)} -- This function uses a random number to determine which isotope of the fuel the neutron is interacting with, and sets appropriate probabilities of absorption and fission based on that result.
+\item \textit{double fissXS(double)} -- This function claculates the fission cross-section of U-235 given a particular energy.
+\end{itemize}
+
+In addition to these class definitions, this module also contains a routine \textit{void init{\_}materials(int\& , int\& )} which sets up the fuel and moderator materials.  It also defines a function \textit{void elastic(const double, int, double\& , double[3])}, which performs elastic scattering off a material.  There is also a \textit{getPtr{\_}material} function which ended up not being used due to how the materials were defined.
+
 The header file is found in Appendix E, and the source is in Appendix F.
 
 \subsection{Particles}\label{ss:particles}
