@@ -66,7 +66,7 @@ int main()
   }
   
   // outer loop over power iterations
-  const int max_iters = 100, active_iters = 80, inactive_iters = 20;
+  const int max_iters = 100, active_iters = 20, inactive_iters = 80;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy;
   int k = 0, l = 0, result, ktot = 0;
@@ -81,11 +81,6 @@ int main()
       // Get pointer to particle
       neutron = sourceBank.back();
       // Simulate particle
-/*if (fissionBank.size() == 29923)
-{
-  cout << "Wait here" << endl;
-// Neutron is getting outside the box somehow.  Need to understand what's happening there.
-}*/
       result = neutron.simulate();
       // Create fission neutrons (if fissions > 0)
       if(result > 0)
