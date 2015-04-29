@@ -30,7 +30,7 @@ int main()
 
   init_materials(fuelid, modid);
 
-  int batch_size = 1E4;
+  int batch_size = 1E3;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
@@ -64,9 +64,8 @@ int main()
   for(int p = 0; p < npitch; p++)
   {
     pitch = pitches[p];
-
-    pitch = 4.0;
     initPinCell(pitch, fuelid, modid);
+
     // zero all estimators
     k = 0;
     l = 0;
@@ -161,8 +160,6 @@ int main()
       sigTL = sqrt((tally_TLsq/active_particles - 
         keff_TL*keff_TL)/active_particles);
       keff_Coll = tally_coll/active_particles;
-      cout << "tally_collsq = " << tally_collsq << endl;
-      cout << "sigColl^2 = " << tally_collsq/active_particles - keff_Coll*keff_Coll << endl;
       sigColl = sqrt((tally_collsq/active_particles - 
         keff_Coll*keff_Coll)/active_particles);
       topleak = topCurrent/active_particles;
@@ -212,6 +209,7 @@ int main()
 
     // clean out old geometry
     clearGeom();
+
   }
   myfile.close();
   return 0;

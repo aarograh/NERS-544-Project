@@ -386,7 +386,17 @@ void makeSource(std::vector<fission> &fissionBank,
   double sourceProb, xi;
   fission* fissptr;
 
-  if (fissionBank.size() > batch_size) // Fission bank is too large
+  if (fissionBank.size() == batch_size)
+  {
+    while(!fissionBank.empty())
+    {
+      fissptr = &fissionBank.back();
+      sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+        1.0,Watt(),0)); 
+      fissionBank.pop_back();
+    }
+  }
+  else if (fissionBank.size() > batch_size) // Fission bank is too large
   {
     //Add neutrons to source bank with probability batch_size/fissionBank.size()
     while(!fissionBank.empty())
