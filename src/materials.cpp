@@ -121,13 +121,13 @@ void moderator::modMacro(double E, double *totalxs, double *H_frac,
 }
 
 void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, 
-    double *frac_U238)
+    double *frac_U238, double *fiss_frac, double *abs_frac)
 {
   double sqrE = sqrt(E);
   // check for proximity to a resonance
   res_xs = 0; 
   for(int j = 0; j < nres; j++){
-    if(fabs(E-Eres[j]) > dres*rwidth[j]){
+    if(fabs(E-Eres[j]) < dres*rwidth[j]){
       y = (2.0/rwidth[j])*(E-Eres[j]);
       res_xs = fueldens[2]*U238_res[j]*sqrt(Eres[j]/E)/(1+y*y);
     }
@@ -149,101 +149,30 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235,
 
   *totalxs = macscat_O+macscat_U235+macscat_U238+maccap_U235+maccap_U238+
     macfiss_U235;
-  *frac_U235 = (macscat_U235+maccap_U235+macfiss_U235)/(*totalxs);
-  *frac_U238 = (macscat_U238+maccap_U238)/(*totalxs);
+  double scatterXS = macscat_U235+macscat_U238+macscat_O;
+  *frac_U235 = macscat_U235/scatterXS;
+  *frac_U238 = macscat_U238/scatterXS;
+  *fiss_frac = macfiss_U235/(*totalxs);
+  *abs_frac = (maccap_U235+maccap_U238)/(*totalxs);
 
   return;
 }
 
-int fuel::sample_U(double E, double *frac_U235, double *frac_U238, 
-    double *abs_frac, double *fiss_frac)
+int fuel::sample_U(double *frac_U235, double *frac_U238)
 {
-  double sqrE = sqrt(E);
   double xi = drand();
-  if(xi < *frac_U235){
-    macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*
-      exp(fuel_scat[1][2]*sqrE);
-    maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*
-      exp(fuel_cap[0][2]*sqrE);
-    macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*
-      exp(U235_fiss[2]*sqrE);
-
-    *fiss_frac = macfiss_U235/(macscat_U235+maccap_U235+macfiss_U235);
-    *abs_frac = (macfiss_U235+maccap_U235)/(macscat_U235+maccap_U235+
-      macfiss_U235);
+  if(xi < *frac_U235)
+  {
     return U235;
   }
-  else if(xi < (*frac_U235+*frac_U238)){
-    // check for proximity to a resonance
-    res_xs = 0; 
-    for(int j = 0; j < nres; j++){
-      if(fabs(E-Eres[j]) > dres*rwidth[j]){
-        y = (2/rwidth[j])*(E-Eres[j]);
-        res_xs = fueldens[2]*U238_res[j]*sqrt(Eres[j]/E)/(1+y*y);
-      }
-    }
-
-    macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*
-      exp(fuel_scat[2][2]*sqrE);
-    maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*
-      exp(fuel_cap[1][2]*sqrE)+res_xs;
-    
-    *fiss_frac = 0;
-    *abs_frac = maccap_U238/(maccap_U238+macscat_U238);
+  else if(xi < (*frac_U235+*frac_U238))
+  {
     return U238;
   }
-  else{ // capture in oxygen
-    *fiss_frac = 0;
-    *abs_frac = 0;
+  else
+  {
     return O16;
   }
-}
-
-int fuel::implicit_U(double E, double *frac_U235, double *frac_U238, 
-    double *abs_frac, double *fiss_frac)
-{
-  double sqrE = sqrt(E);
-  double xi = drand();
-  int isotope = 1;
-  macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*
-    exp(fuel_scat[1][2]*sqrE);
-  maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*
-    exp(fuel_cap[0][2]*sqrE);
-  macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*
-    exp(U235_fiss[2]*sqrE);
-
-  // check for proximity to a resonance
-  res_xs = 0; 
-  for(int j = 0; j < nres; j++){
-    if(fabs(E-Eres[j]) > dres*rwidth[j]){
-      y = (2/rwidth[j])*(E-Eres[j]);
-      res_xs = fueldens[2]*U238_res[j]*sqrt(Eres[j]/E)/(1+y*y);
-    }
-  }
-
-  macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*
-    exp(fuel_scat[2][2]*sqrE);
-  maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*
-    exp(fuel_cap[1][2]*sqrE)+res_xs;
-    
-
-  *abs_frac = (macfiss_U235+maccap_U235+maccap_U238)/(macscat_U235+
-    maccap_U235+macfiss_U235+maccap_U238+macscat_U238);
-  
-  if(xi < *frac_U235){
-    *fiss_frac = macfiss_U235/(macscat_U235+maccap_U235+macfiss_U235);
-    isotope = U235;
-  }
-  else if(xi < (*frac_U235+*frac_U238)){
-    *fiss_frac = 0;
-    isotope = U238;
-  }
-  else{ // capture in oxygen
-    *fiss_frac = 0;
-    isotope = O16;
-  }
-
-  return isotope;
 }
 
 void elastic(const double T, int A_in, double &v_n, double d_n[3])

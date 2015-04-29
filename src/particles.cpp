@@ -39,9 +39,9 @@ particle::particle(const double pos_in[3], double gamma, double mu, double E_in,
 
   score = 0.0;
   estimatorTL = 0.0;
-  squareTL = 0.0;
+  //squareTL = 0.0;
   estimatorColl = 0.0;
-  squareColl = 0.0;
+  //squareColl = 0.0;
 }
 
 fission::fission(const particle& neutron, int cellid_in)
@@ -53,7 +53,7 @@ fission::fission(const particle& neutron, int cellid_in)
   cellid = cellid_in;
 }
 
-int particle::simulate(double pitch)
+int particle::simulate()
 {
   int result, surfid;
   int isotope;
@@ -71,7 +71,7 @@ int particle::simulate(double pitch)
     cellptr = getPtr_cell(cellid);
     if(cellptr->id == fuelid)
     {
-      thisFuel->fuelMacro(energy,&totalXS,&f235,&f238);
+      thisFuel->fuelMacro(energy,&totalXS,&f235,&f238,&fiss_frac,&abs_frac);
     }
     else if(cellptr->id == modid)
     {
@@ -94,9 +94,9 @@ int particle::simulate(double pitch)
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
-        score = dsurf*weight*nu*(thisFuel->fissXS(energy));
+        score = dsurf*weight*nu*fiss_frac*totalXS;
         estimatorTL = estimatorTL + score;
-        squareTL = squareTL + score*score;
+        //squareTL = squareTL + score*score;
         
       }
       // Move particle
@@ -139,26 +139,24 @@ int particle::simulate(double pitch)
     // Move particle to collision point and sample collision
     else
     {
-          position[0] += omega[0]*dcoll;
-          position[1] += omega[1]*dcoll;
-          position[2] += omega[2]*dcoll;
+      position[0] += omega[0]*dcoll;
+      position[1] += omega[1]*dcoll;
+      position[2] += omega[2]*dcoll;
       switch(cellptr->id)
       { 
         case fuelid:
-          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
           // tally the track length estimator and the collision estimator
-          if(cellptr->id == fuelid)
-          {
-            score = dcoll*weight*nu*fiss_frac*totalXS;
-            estimatorTL = estimatorTL + score;
-            squareTL = squareTL + score*score;
-            score = weight*nu*fiss_frac;
-            estimatorColl = estimatorColl + score;
-            squareColl = squareColl + score*score;
-          }
+          score = dcoll*weight*nu*fiss_frac*totalXS;
+          estimatorTL = estimatorTL + score;
+          //squareTL = squareTL + score*score;
+          score = weight*nu*fiss_frac;
+          estimatorColl = estimatorColl + score;
+          //squareColl = squareColl + score*score;
+
           xi = drand();
           if(xi > abs_frac) // scatter
           {
+            isotope = thisFuel->sample_U(&f235,&f238);
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
             elastic(temp,isotope,vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
@@ -172,7 +170,7 @@ int particle::simulate(double pitch)
             }
             else // fission
             {
-              result = static_cast<int>(nu+drand());
+              result = static_cast<int>(weight*nu+drand());
             }
           }
           break;
@@ -210,7 +208,7 @@ int particle::simulate(double pitch)
   return result;
 }
 
-int particle::simulate_implicit(double pitch)
+int particle::simulate_implicit()
 {
   int result, surfid;
   int isotope;
@@ -228,7 +226,7 @@ int particle::simulate_implicit(double pitch)
     cellptr = getPtr_cell(cellid);
     if(cellptr->id == fuelid)
     {
-      thisFuel->fuelMacro(energy,&totalXS,&f235,&f238);
+      thisFuel->fuelMacro(energy,&totalXS,&f235,&f238,&fiss_frac,&abs_frac);
     }
     else if(cellptr->id == modid)
     {
@@ -251,9 +249,9 @@ int particle::simulate_implicit(double pitch)
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
-        score = dsurf*weight*nu*(thisFuel->fissXS(energy));
+        score = dsurf*weight*nu*fiss_frac*totalXS;
         estimatorTL = estimatorTL + score;
-        squareTL = squareTL + score*score;
+        //squareTL = squareTL + score*score;
         
       }
       // Move particle
@@ -301,14 +299,14 @@ int particle::simulate_implicit(double pitch)
       position[2] += omega[2]*dcoll;
       if(cellptr->id == fuelid)
       { 
-        isotope = thisFuel->implicit_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
+        isotope = thisFuel->sample_U(&f235,&f238);
         // tally the track length estimator and the collision estimator
         score = dcoll*weight*nu*fiss_frac*totalXS;
         estimatorTL = estimatorTL + score;
-        squareTL = squareTL + score*score;
+        //squareTL = squareTL + score*score;
         score = weight*nu*fiss_frac;
         estimatorColl = estimatorColl + score;
-        squareColl = squareColl + score*score;
+        //squareColl = squareColl + score*score;
 
         xi = drand();
 
@@ -318,7 +316,7 @@ int particle::simulate_implicit(double pitch)
         if(xi < fiss_frac)
         {
 //          std::cout << "Particle fissioned." << std::endl;
-          result = static_cast<int>(nu+drand());
+          result = static_cast<int>(weight*nu+drand());
           isAlive = false;
         }
         weight = weight*(1.0-abs_frac);

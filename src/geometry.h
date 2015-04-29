@@ -50,4 +50,5 @@ cell* getPtr_cell(int);
 surface* getPtr_surface(int);
 
 void initPinCell(double, int, int);
+void clearGeom();
 int getCellID(double*);

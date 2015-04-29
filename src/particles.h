@@ -25,7 +25,7 @@ class particle{
     int simulate_implicit();
     bool roulette();
     double weight;
-    double estimatorTL,squareTL,estimatorColl,squareColl;
+    double estimatorTL,estimatorColl;
     friend class fission;
 };
 

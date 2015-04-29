@@ -410,6 +410,21 @@ void initPinCell(double pitch, int fuelid, int modid)
   return;
 }
 
+void clearGeom()
+{
+  while(!cellList.empty())
+  {
+    delete cellList.back();
+    cellList.pop_back();
+  }
+  while(!surfaceList.empty())
+  {
+    delete surfaceList.back();
+    surfaceList.pop_back();
+  }
+  return;
+}
+
 int getCellID(double* position)
 {
   int surfid, j;
