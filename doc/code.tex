@@ -14,7 +14,21 @@ In addition to these functions, the header file for Utils also defines many cons
 
 \subsection{Geometry}\label{ss:geometry}
 
+The second module is the geometry module.  This defines all the functions required for two main classes: \textit{cell} and \textit{surface}.
 
+The \textit{surface} class has two sub-classes: \textit{plane} and \textit{cylinder}.  The \textit{plane} class assumes that the plane is perpendicular to one of the three coordinate axes.  This assumption could easily be generalized, but was made to simplify this problem.  The plane is then defined by a point on the plane and the normal vector for the plane.  The \textit{cylinder} class assumes that the cylinder has some origin, a radius, and an axis which extends parallel to the $z$-axis.  Thus, no rotation of the cylinder is allowed.
+
+Both sub-classes of the \textit{surface} class implement several important functions:
+
+\begin{itemize}
+\item \textit{double distToIntersect(double*, double*)} -- This function takes a position and direction as input arguments.  It then calculate the distance from the position to the surface along the given direction.  The distances might be negative.
+\item \textit{void reflect(double*, double*)} -- This function takes a position and direction.  The direction is modified as if it had reflected off the surface.
+\item \textit{int getSense(double*)} -- This function takes a 3D point and returns 1 or -1, depending on where the point is.  For a \textit{plane} class, 1 denotes being on the ``positive'' side of the plane and -1 on the ``negative'' side (with respect to the axis that the plane is perpendicular to), while for a \textit{cylinder} class, 1 denotes being outside the cylinder and -1 denotes being inside it.
+\end{itemize}
+
+The \textit{cell} class is defined mostly in terms of surfaces.  It contains a vector of \textit{surface} ID numbers, \textit{iSurfs}, and \textit{senses}, which contains a 1 or -1 for each surface to indicate which side of the surface the cell is on.  It also contains a \textit{material} ID number, and a \textit{distToIntersect} function, which simply calls the corresponding function on each of the \textit{cell}'s \textit{surface} classes and returns the minimum positive distance.
+
+This module also contains two vectors of pointers: one for each \textit{surface} that has been created, and the other for each \textit{cell} that has been created.  The routines \textit{getPtr{\_}cell(int)} and \textit{getPtr{\_}surface(int)} each return a pointer from one of these lists when given an ID number.
 
 \subsection{Materials}\label{ss:materials}
 
