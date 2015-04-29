@@ -2,7 +2,15 @@ The code used for this project was written using C++.  It was broken into five d
 
 \subsection{Utils}\label{ss:utils}
 
+This module contains functions which will be needed throughout the code and are not tied to any specific functionality.  Some of these functions are as follows:
 
+\begin{itemize}
+\item \textit{double drand(void)} -- This function uses the intrinsic C function \textit{int rand()} to return a random double precision number between 0.0 and 1.0.
+\item \textit{double Watt(void)} -- This function returns a random energy for a fission neutron, sampled from the Watt spectrum.
+\item \textit{bool approxeq(double, double)}, \textit{bool approxge(double, double)}, \textit{bool approxle(double, double)} -- These functions are used for $==$, $\ge$, and $\le$ operators, respectively, for floating point double precision numbers.
+\end{itemize}
+
+In addition to these functions, the header file for Utils also defines many constants for use in the code, such as pi, the mass of a neutron, the Boltzmann constant, and others used for various parts of the code.
 
 \subsection{Geometry}\label{ss:geometry}
 
