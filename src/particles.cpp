@@ -147,9 +147,14 @@ int particle::simulate()
         case fuelid:
           // tally the track length estimator and the collision estimator
           score = dcoll*weight*nu*fiss_frac*totalXS;
+          //std::cout << "Particle weight = " << weight << std::endl;
+	  //std::cout << "absorption fraction = " << abs_frac << std::endl;
+	  //std::cout << "fission fraction = " << fiss_frac << std::endl;
+          //std::cout << "total XS = " << totalXS << std::endl;
           estimatorTL = estimatorTL + score;
           //squareTL = squareTL + score*score;
           score = weight*nu*fiss_frac;
+          //std::cout << "Score added = " << score << std::endl;
           estimatorColl = estimatorColl + score;
           //squareColl = squareColl + score*score;
 

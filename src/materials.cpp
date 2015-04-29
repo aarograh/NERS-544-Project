@@ -153,7 +153,7 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235,
   *frac_U235 = macscat_U235/scatterXS;
   *frac_U238 = macscat_U238/scatterXS;
   *fiss_frac = macfiss_U235/(*totalxs);
-  *abs_frac = (maccap_U235+maccap_U238)/(*totalxs);
+  *abs_frac = (maccap_U235+maccap_U238+macfiss_U235)/(*totalxs);
 
   return;
 }
