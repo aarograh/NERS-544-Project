@@ -86,7 +86,8 @@ int main()
   cout << "Wait here" << endl;
 // Neutron is getting outside the box somehow.  Need to understand what's happening there.
 }*/
-      result = neutron.simulate();
+//      result = neutron.simulate();
+      result = neutron.simulate_implicit();
       // Create fission neutrons (if fissions > 0)
       if(result > 0)
       { 

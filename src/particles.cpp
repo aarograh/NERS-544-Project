@@ -26,6 +26,8 @@ particle::particle(const double pos_in[3], double gamma, double mu, double E_in,
 
   energy = E_in;
   weight = 1.0;
+  cutoff = 0.2;
+  survival = 0.5;
 
   totalXS = 0.0;
   f235 = 0.0;
@@ -208,6 +210,163 @@ int particle::simulate(double pitch)
   return result;
 }
 
+int particle::simulate_implicit()
+{
+  int result, surfid;
+  int isotope;
+  const int fuelid = 0; const int modid = 1; 
+  double vn, xi;
+  double dcoll, dsurf, intersection[3];
+  cell* cellptr;
+  surface* surfptr;
+  fuel* thisFuel = new fuel(fuelid);
+  moderator* thisMod = new moderator(modid);
+
+  while (isAlive)
+  {
+    // Get pointer to the current cell
+    cellptr = getPtr_cell(cellid);
+    if(cellptr->id == fuelid)
+    {
+      thisFuel->fuelMacro(energy,&totalXS,&f235,&f238);
+    }
+    else if(cellptr->id == modid)
+    {
+      thisMod->modMacro(energy,&totalXS,&fH,&fcap); 
+    }
+    else
+    {
+      std::cout << "Not fuel or moderator id." << std::endl;
+      exit(-3);
+    }
+    // get distance to next collision
+    //dcoll = 500.0; // Just to test the surface/cell stuff
+    dcoll = -log(drand())/(totalXS);
+    // Get closest surface distance
+    dsurf = cellptr->distToIntersect(position, omega, intersection, surfid);
+    
+    // Move particle to surface
+    if (dsurf < dcoll)
+    {
+      // tally the track length estimator for keff
+      if(cellptr->id == fuelid)
+      {
+        score = dsurf*weight*nu*(thisFuel->fissXS(energy));
+        estimatorTL = estimatorTL + score;
+        squareTL = squareTL + score*score;
+        
+      }
+      // Move particle
+      position[0] = intersection[0];
+      position[1] = intersection[1];
+      position[2] = intersection[2];
+      // get pointer to the surface that the particle is colliding with
+      surfptr = getPtr_surface(surfid);
+      switch(surfptr->boundaryType)
+      {
+        // Particle hit reflecting boundary
+        case reflecting:
+          surfptr->reflect(intersection, omega);
+          // Nudge the particle a bit to avoid floating point issues
+          position[0] += omega[0]*nudge;
+          position[1] += omega[1]*nudge;
+          position[2] += omega[2]*nudge;
+          break;
+        // Particle hit vacuum boundary and escaped
+        case vacuum:
+          // Set return value and "kill" particle
+          result = -surfid;
+          isAlive = false;
+          break;
+        // Particle hit interior surface
+        case interior:
+          position[0] += omega[0]*nudge;
+          position[1] += omega[1]*nudge;
+          position[2] += omega[2]*nudge;
+          
+          cellid = getCellID(position);
+          cellptr = getPtr_cell(cellid);
+          break;
+        default:
+          std::cout << "Error in particle::simulate().  Particle encountered " 
+            << "unknown boundary type." << std::endl;
+          exit(-2);
+      }
+    }
+    // Move particle to collision point and sample collision
+    else
+    {
+          position[0] += omega[0]*dcoll;
+          position[1] += omega[1]*dcoll;
+          position[2] += omega[2]*dcoll;
+      switch(cellptr->id)
+      { 
+        case fuelid:
+          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
+          // tally the track length estimator and the collision estimator
+          if(cellptr->id == fuelid)
+          {
+            score = dcoll*weight*nu*fiss_frac*totalXS;
+            estimatorTL = estimatorTL + score;
+            squareTL = squareTL + score*score;
+            score = weight*nu*fiss_frac;
+            estimatorColl = estimatorColl + score;
+            squareColl = squareColl + score*score;
+          }
+          xi = drand();
+
+          vn = sqrt(2.0*energy/neut_mass)*lightspeed;
+          elastic(temp,isotope,vn,omega);
+          energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
+          if(xi < fiss_frac)
+          {
+            result = static_cast<int>(nu+drand());
+            isAlive = false;
+          }
+          weight = weight*abs_frac;
+          roulette();
+        case modid:
+          if(drand() < fH) // interaction with hydrogen
+          {
+            vn = sqrt(2.0*energy/neut_mass)*lightspeed;
+            elastic(temp,1,vn,omega);
+            energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
+          }
+          else // interaction with oxygen; all are scatters
+          {
+            vn = sqrt(2.0*energy/neut_mass)*lightspeed;
+            elastic(temp,16,vn,omega);
+            energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
+          }
+          weight = weight*fH*fcap;
+          roulette();
+          break;
+        default:
+          std::cout << "Not fuel or moderator id." << std::endl;
+          exit(-3);
+      }
+    }
+  }
+
+  delete thisFuel;
+  delete thisMod;
+  return result;
+}
+
+void particle::roulette()
+{
+  if(weight < cutoff)
+  {
+    if(drand() < weight/survival)
+    { 
+      weight = survival;
+    }
+    else
+    {
+      isAlive = false;
+    }
+  }
+}
 void makeSource(std::vector<fission> &fissionBank, 
     std::vector<particle> &sourceBank, int batch_size)
 {

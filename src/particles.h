@@ -20,7 +20,11 @@ class particle{
     particle(double[3], double, double, double, int);
     double getCoord(int);
     int simulate();
+    int simulate_implicit();
+    void roulette();
     double weight;
+    double cutoff;
+    double survival;
     double estimatorTL,squareTL,estimatorColl,squareColl;
     friend class fission;
 };
