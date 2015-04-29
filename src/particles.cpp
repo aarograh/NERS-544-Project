@@ -210,7 +210,7 @@ int particle::simulate(double pitch)
   return result;
 }
 
-int particle::simulate_implicit()
+int particle::simulate_implicit(double pitch)
 {
   int result, surfid;
   int isotope;
