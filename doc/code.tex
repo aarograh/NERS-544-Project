@@ -75,7 +75,7 @@ The header file is found in Appendix G, and the source in Appendix H.
 
 \subsection{Driver}\label{ss:driver}
 
-The driver contains the actual iteration logic to solve the problem.  The driver performs the following algorithm:
+The driver contains the actual iteration logic to solve the problem.  The problem was solved by performing a power iteration beginning with an initial source bank of neutrons which were uniformly sampled within the fuel region.  Since the neutrons are representative of fission neutrons, their direction was sampled isotropically and their energy was sampled from the Watt Spectrum.  After the first iteration, the source bank was populated from the fissions occurring in the previous iteration.  The full algorithm for the code is shown below:
 
 \begin{center}
 \begin{tabular}{l|l}
