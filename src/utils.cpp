@@ -1,6 +1,6 @@
 // AUTHORS: Aaron Graham, Mike Jarrett
 // PURPOSE: NERS 544 Course Project
-// DATE   : April 3, 2015
+// DATE   : April 30, 2015
 
 #include<cstdlib>
 #include<limits>
@@ -13,6 +13,7 @@ double drand(void)
   return static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 }
 
+// Samples the Watt Spectrum
 double Watt(void)
 {
   double a = 0.988; // MeV
@@ -27,6 +28,7 @@ double Watt(void)
   return W + a*a*b/4 + (2*x4-1)*sqrt(a*a*b*W); 
 }
 
+// These operators are used for ==, >=, and <= for floating point values
 bool approxeq(double x1, double x2)
 {
   return (x1 > x2 - eps && x1 < x2 + eps);
@@ -42,3 +44,7 @@ bool approxle(double x1, double x2)
   return (x1 < x2 + eps);
 }
 
+bool softeq(double x1, double x2, double tol)
+{
+  return (x1 > x2 - tol && x1 < x2 + tol);
+}

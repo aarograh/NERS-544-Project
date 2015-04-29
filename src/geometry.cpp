@@ -1,6 +1,6 @@
 // AUTHORS: Aaron Graham, Mike Jarrett
 // PURPOSE: NERS 544 Course Project
-// DATE   : April 3, 2015
+// DATE   : April 30, 2015
 
 #include "geometry.h"
 #include "utils.h"
@@ -106,7 +106,8 @@ int plane::getSense(double* position)
 // Constructor for cylindrical surface
 // It is assumed that the cylinder's axis begins at (0,0,0) and
 // points along the z-axis
-cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound_in)
+cylinder::cylinder(int surfid, double x, double y, double z, double R, 
+    int bound_in)
 {
   // Set values
   id = surfid;
@@ -128,7 +129,6 @@ cylinder::cylinder(int surfid, double x, double y, double z, double R, int bound
 double cylinder::distToIntersect(double position[3], double direction[3])
 {
   double distance = -1.0;
-  double incidence = -1.0;
   double intersection[3];
   double x, y, a, b, c, dis, m;
   double xp, xm, yp, ym, d2o, tmp;
@@ -152,7 +152,7 @@ double cylinder::distToIntersect(double position[3], double direction[3])
 
   // If vector is pointing straight down in 2D, slope is 0, so
   // we treat this case specially
-  if (approxeq(direction[0],0.0))
+  if (softeq(direction[0],0.0,1.0e-4))
   {
     // Calculate 2 possible intersections
     yp = sin(acos(x/radius))*radius;
@@ -332,12 +332,12 @@ double cell::distToIntersect(double* position, double* direction,
     // Get surface id
     surfid = iSurfs.at(i);
     // Calculate distancce to that surface
-    double temp = 
-      (*surfaceList.at(surfid)).distToIntersect(position,direction);
+    double tmp = 
+      surfaceList.at(surfid)->distToIntersect(position,direction);
     // If this distance is better than the best so far, assign it
-    if (temp > 0.0 && (temp < distance || distance < 0.0)) 
+    if (tmp > 0.0 && (tmp < distance || distance < 0.0)) 
     {
-      distance = temp;
+      distance = tmp;
       surfIntersect = surfid;
     }
   }
@@ -379,9 +379,9 @@ void initPinCell(double pitch, int fuelid, int modid)
 
 // Build the fuel pin
   // Construct cylinder for fuel pin
-  surfaceList.push_back(new cylinder(surfaceList.size(),0.0,0.0,0.0,1.5,-1));
+  surfaceList.push_back(new cylinder(surfaceList.size(),0.0,0.0,0.0,radius,-1));
   // Construct top plane
-  surfaceList.push_back(new plane(surfaceList.size(),100.0,zplane,0));
+  surfaceList.push_back(new plane(surfaceList.size(),height,zplane,0));
   // Construct bottom plane
   surfaceList.push_back(new plane(surfaceList.size(),0.0,zplane,0));
   // Construct the cell
@@ -413,7 +413,7 @@ void initPinCell(double pitch, int fuelid, int modid)
 int getCellID(double* position)
 {
   int surfid, j;
-  double senses[surfaceList.size()];
+  int senses[surfaceList.size()];
   cell* cellptr;
   surface* surfptr;
   std::fill_n(senses, surfaceList.size(), 0);
@@ -421,17 +421,17 @@ int getCellID(double* position)
   for (int i = 0; i < cellList.size(); i++)
   {
     cellptr = cellList.at(i);
-    for (j = 0; j < (*cellptr).iSurfs.size(); j++)
+    for (j = 0; j < cellptr->iSurfs.size(); j++)
     {
-      surfid = (*cellptr).iSurfs[j];
+      surfid = cellptr->iSurfs[j];
       surfptr = getPtr_surface(surfid);
       // Surface has not been checked yet
-      if (senses[surfid] == 0) senses[surfid] = (*surfptr).getSense(position);
+      if (senses[surfid] == 0) senses[surfid] = surfptr->getSense(position);
       // position is on wrong side of surface
-      if(!(senses[surfid] == (*cellptr).senses[j])) break;
+      if(!(senses[surfid] == cellptr->senses[j])) break;
     }
     // Checked all surfaces without a break, so return this cell
-    if (j == (*cellptr).iSurfs.size()) return (*cellptr).id;
+    if (j == cellptr->iSurfs.size()) return cellptr->id;
   }
 
   return -1;

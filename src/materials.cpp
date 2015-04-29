@@ -1,6 +1,6 @@
 // AUTHORS: Aaron Graham, Mike Jarrett
 // PURPOSE: NERS 544 Course Project
-// DATE   : April 3, 2015
+// DATE   : April 30, 2015
 
 #include<vector>
 #include<cmath>
@@ -9,6 +9,7 @@
 #include "utils.h"
 
 std::vector<material*> materialList;
+const int O16 = 16, U235 = 235, U238 = 238;
 
 moderator::moderator(int matid)
 {
@@ -102,12 +103,15 @@ material* getPtr_material(int matid)
   return materialList.at(matid);
 }
 
-void moderator::modMacro(double E, double *totalxs, double *H_frac, double *abs_frac)
+void moderator::modMacro(double E, double *totalxs, double *H_frac, 
+    double *abs_frac)
 {
   double sqrE = sqrt(E);
   macabs_H = moddens[0]*mod_cap[1]/sqrE;
-  macscat_H = moddens[0]*(mod_scat[0][0]+mod_scat[0][1]/sqrE)*exp(mod_scat[0][2]*sqrE);
-  macscat_O = moddens[1]*(mod_scat[1][0]+mod_scat[1][1]/sqrE)*exp(mod_scat[1][2]*sqrE);
+  macscat_H = moddens[0]*(mod_scat[0][0]+mod_scat[0][1]/sqrE)*
+    exp(mod_scat[0][2]*sqrE);
+  macscat_O = moddens[1]*(mod_scat[1][0]+mod_scat[1][1]/sqrE)*
+    exp(mod_scat[1][2]*sqrE);
 
   *totalxs = macscat_H+macscat_O+macabs_H;
   *H_frac = (macabs_H+macscat_H)/(*totalxs);
@@ -116,7 +120,8 @@ void moderator::modMacro(double E, double *totalxs, double *H_frac, double *abs_
    return;
 }
 
-void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, double *frac_U238)
+void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, 
+    double *frac_U238)
 {
   double sqrE = sqrt(E);
   // check for proximity to a resonance
@@ -128,35 +133,45 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, double *frac_
     }
   }
 
-  macscat_O = fueldens[0]*(fuel_scat[0][0]+fuel_scat[0][1]/sqrE)*exp(fuel_scat[0][2]*sqrE);
-  macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*exp(fuel_scat[1][2]*sqrE);
-  macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*exp(fuel_scat[2][2]*sqrE);
+  macscat_O = fueldens[0]*(fuel_scat[0][0]+fuel_scat[0][1]/sqrE)*
+    exp(fuel_scat[0][2]*sqrE);
+  macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*
+    exp(fuel_scat[1][2]*sqrE);
+  macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*
+    exp(fuel_scat[2][2]*sqrE);
 
-  maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*exp(fuel_cap[0][2]*sqrE);
-  maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE)+res_xs;
-  macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
+  maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*
+    exp(fuel_cap[0][2]*sqrE);
+  maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*
+    exp(fuel_cap[1][2]*sqrE)+res_xs;
+  macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*
+    exp(U235_fiss[2]*sqrE);
 
-  *totalxs = macscat_O+macscat_U235+macscat_U238+maccap_U235+maccap_U238+macfiss_U235;
+  *totalxs = macscat_O+macscat_U235+macscat_U238+maccap_U235+maccap_U238+
+    macfiss_U235;
   *frac_U235 = (macscat_U235+maccap_U235+macfiss_U235)/(*totalxs);
   *frac_U238 = (macscat_U238+maccap_U238)/(*totalxs);
 
   return;
 }
 
-int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_frac, double *fiss_frac)
+int fuel::sample_U(double E, double *frac_U235, double *frac_U238, 
+    double *abs_frac, double *fiss_frac)
 {
   double sqrE = sqrt(E);
   double xi = drand();
   if(xi < *frac_U235){
-    macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*exp(fuel_scat[1][2]*sqrE);
-    maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*exp(fuel_cap[0][2]*sqrE);
-    macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
+    macscat_U235 = fueldens[1]*(fuel_scat[1][0]+fuel_scat[1][1]/sqrE)*
+      exp(fuel_scat[1][2]*sqrE);
+    maccap_U235 = fueldens[1]*(fuel_cap[0][0]+fuel_cap[0][1]/sqrE)*
+      exp(fuel_cap[0][2]*sqrE);
+    macfiss_U235 = fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*
+      exp(U235_fiss[2]*sqrE);
 
     *fiss_frac = macfiss_U235/(macscat_U235+maccap_U235+macfiss_U235);
-    *abs_frac = (macfiss_U235+maccap_U235)/(macscat_U235+maccap_U235+macfiss_U235);
-//    std::cout << "Capture fraction in 235 = " << *abs_frac << std::endl;
-//    std::cout << "Fission fraction in 235 = " << *fiss_frac << std::endl;
-    return 235;
+    *abs_frac = (macfiss_U235+maccap_U235)/(macscat_U235+maccap_U235+
+      macfiss_U235);
+    return U235;
   }
   else if(xi < (*frac_U235+*frac_U238)){
     // check for proximity to a resonance
@@ -168,32 +183,27 @@ int fuel::sample_U(double E, double *frac_U235, double *frac_U238, double *abs_f
       }
     }
 
-    macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*exp(fuel_scat[2][2]*sqrE);
-    maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*exp(fuel_cap[1][2]*sqrE)+res_xs;
+    macscat_U238 = fueldens[2]*(fuel_scat[2][0]+fuel_scat[2][1]/sqrE)*
+      exp(fuel_scat[2][2]*sqrE);
+    maccap_U238 = fueldens[2]*(fuel_cap[1][0]+fuel_cap[1][1]/sqrE)*
+      exp(fuel_cap[1][2]*sqrE)+res_xs;
     
     *fiss_frac = 0;
     *abs_frac = maccap_U238/(maccap_U238+macscat_U238);
-//    std::cout << "Capture fraction in 238 = " << *abs_frac << std::endl;
-    return 238;
+    return U238;
   }
   else{ // capture in oxygen
     *fiss_frac = 0;
     *abs_frac = 0;
-    return 16;
+    return O16;
   }
 }
 
-void elastic(const double temp, int A_in, double &v_n, double d_n[3])
+void elastic(const double T, int A_in, double &v_n, double d_n[3])
 {
   double A = static_cast<double>(A_in);
-  double beta = sqrt(neut_mass/(lightspeed*lightspeed)*A/(2*kB*temp)); 
-//std::cout << "beta = " << beta << std::endl;
+  double beta = sqrt(neut_mass/(lightspeed*lightspeed)*A/(2*kB*T)); 
 
-//std::cout << "temperature = " << temp << std::endl;
-//std::cout << "isotope mass = " << A << std::endl;
-//std::cout << "incoming velocity = " << *v_n << std::endl;
-//std::cout << "directions = " << d_n[0] 
-//          << " , " << d_n[1] << " , " << d_n[2] << std::endl;
 
   bool transform = false;
   double tmp = d_n[0];
@@ -227,26 +237,24 @@ void elastic(const double temp, int A_in, double &v_n, double d_n[3])
 
     Vtil = x/beta; 
     mutil = 2*drand() - 1;
-//std::cout << "Vtil = " << Vtil << std::endl;
-//std::cout << "mutil = " << mutil << std::endl;
 
     // check for rejection from scaled f1(V,mu) (Lecture Module 8)
     eta = drand();   
     f1 = sqrt(v_n*v_n + Vtil*Vtil - 2*v_n*Vtil*mutil)/(v_n+Vtil);
-//std::cout << "f1 = " << f1 << std::endl;
   }
   
   // sample direction vector for the target nucleus Omega_T-hat 
   double gamma = 2*pi*drand();
-  double Tx = mutil*d_n[0] + (d_n[0]*d_n[2]*cos(gamma) - d_n[1]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
-  double Ty = mutil*d_n[1] + (d_n[1]*d_n[2]*cos(gamma) + d_n[0]*sin(gamma)*sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
-  double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-d_n[2]*d_n[2])); 
+  double Tx = mutil*d_n[0] + (d_n[0]*d_n[2]*cos(gamma) - d_n[1]*sin(gamma)*
+    sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
+  double Ty = mutil*d_n[1] + (d_n[1]*d_n[2]*cos(gamma) + d_n[0]*sin(gamma)*
+    sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
+  double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-d_n[2]*d_n[2]));
 
   // center-of-mass velocity u_xyz
   double ux = (v_n*d_n[0] + A*Vtil*Tx)/(1+A);  
   double uy = (v_n*d_n[1] + A*Vtil*Ty)/(1+A);  
   double uz = (v_n*d_n[2] + A*Vtil*Tz)/(1+A);  
-  double uu = sqrt(ux*ux + uy*uy + uz*uz); // center-of-mass speed
 
   // neutron center-of-mass velocity
   double vcx = v_n*d_n[0] - ux;
@@ -262,8 +270,10 @@ void elastic(const double temp, int A_in, double &v_n, double d_n[3])
   // outgoing neutron center-of-mass direction 
   gamma = 2*pi*drand();
   double muc = 2*drand() - 1;
-  double ncxp = muc*ncx + (ncx*ncz*cos(gamma) - ncy*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
-  double ncyp = muc*ncy + (ncy*ncz*cos(gamma) + ncx*sin(gamma))*sqrt((1-muc*muc)/(1-ncz*ncz)); 
+  double ncxp = muc*ncx + (ncx*ncz*cos(gamma) - ncy*sin(gamma))*
+    sqrt((1-muc*muc)/(1-ncz*ncz)); 
+  double ncyp = muc*ncy + (ncy*ncz*cos(gamma) + ncx*sin(gamma))*
+    sqrt((1-muc*muc)/(1-ncz*ncz)); 
   double nczp = muc*ncz - cos(gamma)*sqrt((1-muc*muc)*(1-ncz*ncz)); 
 
   // finally, outgoing neutron velocity in lab frame is calculated

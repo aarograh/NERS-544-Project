@@ -1,6 +1,6 @@
 // AUTHORS: Aaron Graham, Mike Jarrett
 // PURPOSE: NERS 544 Course Project
-// DATE   : April 3, 2015
+// DATE   : April 30, 2015
 
 #include<vector>
 
@@ -40,7 +40,7 @@ class cell{
   public:
     int id; // cell id number
     std::vector<int> iSurfs; // id numbers of surfaces which create this cell
-    std::vector<int> senses; // senses for each surface in iSurfs. 1 is +, -1 is -
+    std::vector<int> senses; // senses for each surface. 1 is +, -1 is -
     int matid;
     cell(int, int, int*, int*);
     double distToIntersect(double*, double*, double*, int&);

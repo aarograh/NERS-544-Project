@@ -1,6 +1,6 @@
 # AUTHORS: Aaron Graham, Mike Jarrett
 # PURPOSE: NERS 544 Course Project
-# DATE   : April 3, 2015
+# DATE   : April 30, 2015
 
 # MACRO_ENSURE_OUT_OF_SOURCE_BUILD(<errorMessage>)
 

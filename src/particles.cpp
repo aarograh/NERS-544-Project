@@ -1,6 +1,6 @@
 // AUTHORS: Aaron Graham, Mike Jarrett
 // PURPOSE: NERS 544 Course Project
-// DATE   : April 3, 2015
+// DATE   : April 30, 2015
 
 #include<cstdlib>
 #include<cmath>
@@ -10,7 +10,7 @@
 #include "particles.h"
 #include "utils.h"
 
-particle::particle(double pos_in[3], double gamma, double mu, double E_in,
+particle::particle(const double pos_in[3], double gamma, double mu, double E_in,
     int cellid_in)
 {
   cellid = cellid_in;
@@ -42,29 +42,20 @@ particle::particle(double pos_in[3], double gamma, double mu, double E_in,
   squareColl = 0.0;
 }
 
-fission::fission()
+fission::fission(const particle& neutron, int cellid_in)
 {
-  position[0] = 0.0; 
-  position[1] = 0.0; 
-  position[2] = 0.0; 
-  
-  cellid = 0;
-}
-
-fission::fission(double pos_in[3], int cellid_in)
-{
-  position[0] = pos_in[0]; 
-  position[1] = pos_in[1]; 
-  position[2] = pos_in[2]; 
+  position[0] = neutron.position[0]; 
+  position[1] = neutron.position[1]; 
+  position[2] = neutron.position[2]; 
 
   cellid = cellid_in;
 }
 
-int particle::simulate()
+int particle::simulate(double pitch)
 {
   int result, surfid;
   int isotope;
-  const int fuelid = 0; const int modid = 1; // just temporary, need to get these from elsewhere
+  const int fuelid = 0; const int modid = 1; 
   double vn, xi;
   double dcoll, dsurf, intersection[3];
   cell* cellptr;
@@ -72,26 +63,17 @@ int particle::simulate()
   fuel* thisFuel = new fuel(fuelid);
   moderator* thisMod = new moderator(modid);
 
-//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
   while (isAlive)
   {
     // Get pointer to the current cell
-//std::cout << "Currently in cell " << cellid << std::endl;
     cellptr = getPtr_cell(cellid);
     if(cellptr->id == fuelid)
     {
       thisFuel->fuelMacro(energy,&totalXS,&f235,&f238);
-//std::cout << "Total XS = " << totalXS << std::endl;
-//std::cout << "U235 fraction = " << f235 << std::endl;
-//std::cout << "U238 fraction = " << f238 << std::endl;
     }
     else if(cellptr->id == modid)
     {
       thisMod->modMacro(energy,&totalXS,&fH,&fcap); 
-//std::cout << "Total XS = " << totalXS << std::endl;
-//std::cout << "Hydrogen fraction = " << fH << std::endl;
-//std::cout << "Capture fraction = " << fcap << std::endl;
     }
     else
     {
@@ -103,11 +85,7 @@ int particle::simulate()
     dcoll = -log(drand())/(totalXS);
     // Get closest surface distance
     dsurf = cellptr->distToIntersect(position, omega, intersection, surfid);
-//std::cout << std::endl;
-//std::cout << "dcoll=" << dcoll << " dsurf=" << dsurf << " surfid=" << surfid <<  std::endl;
     
-//    std::cout << "Total XS = " << totalXS << std::endl;
-//std::cout << "intersection=(" << intersection[0] << "," << intersection[1] << "," << intersection[2] << ")\n";
     // Move particle to surface
     if (dsurf < dcoll)
     {
@@ -134,45 +112,37 @@ int particle::simulate()
           position[0] += omega[0]*nudge;
           position[1] += omega[1]*nudge;
           position[2] += omega[2]*nudge;
-//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           break;
         // Particle hit vacuum boundary and escaped
         case vacuum:
           // Set return value and "kill" particle
           result = -surfid;
           isAlive = false;
-//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           break;
         // Particle hit interior surface
         case interior:
           position[0] += omega[0]*nudge;
           position[1] += omega[1]*nudge;
           position[2] += omega[2]*nudge;
-//std::cout << "x=" << position[0] << " y=" << position[1] << " z=" << position[2];
-//std::cout << " omegax=" << omega[0] << " omegay=" << omega[1] << " omegaz=" << omega[2] << std::endl;
           
           cellid = getCellID(position);
-//std::cout << "cellid returned from getCellID = " << cellid << std::endl;
           cellptr = getPtr_cell(cellid);
-//std::cout << "cellid = " << cellid << std::endl;
           break;
         default:
-//std::cout << surfid << " " << (*surfptr).boundaryType << std::endl;
-          std::cout << "Error in particle::simulate().  Particle encountered " <<
-            "unknown boundary type." << std::endl;
+          std::cout << "Error in particle::simulate().  Particle encountered " 
+            << "unknown boundary type." << std::endl;
           exit(-2);
       }
     }
     // Move particle to collision point and sample collision
     else
     {
-      moveParticle(dcoll);
+          position[0] += omega[0]*dcoll;
+          position[1] += omega[1]*dcoll;
+          position[2] += omega[2]*dcoll;
       switch(cellptr->id)
       { 
         case fuelid:
-//std::cout << "Particle in fuel." << std::endl;
           isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
           // tally the track length estimator and the collision estimator
           if(cellptr->id == fuelid)
@@ -184,64 +154,46 @@ int particle::simulate()
             estimatorColl = estimatorColl + score;
             squareColl = squareColl + score*score;
           }
-//std::cout << "Interaction with isotope " << isotope << std::endl;
-//std::cout << "Absorption fraction = " << abs_frac << std::endl;
-//std::cout << "Fission fraction = " << fiss_frac << std::endl;
           xi = drand();
           if(xi > abs_frac) // scatter
           {
-//std::cout << "Particle scattered in fuel." << std::endl;
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
-//std::cout << "Incoming particle velocity = " << vn << std::endl;
             elastic(temp,isotope,vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
-//std::cout << "Outgoing particle velocity = " << vn << std::endl;
-//std::cout << "Outgoing particle energy = " << energy << std::endl;
           }
           else // absorption
           {
             isAlive = false;
             if(xi > fiss_frac) // capture, maybe score which isotope
             {
-//std::cout << "Particle was captured in fuel." << std::endl;
               result = 0;
             }
             else // fission
             {
-//std::cout << "Particle fissioned." << std::endl;
               result = static_cast<int>(nu+drand());
             }
           }
           break;
         case modid:
-//std::cout << "Hydrgon XS fraction = " << fH << std::endl;
           if(drand() < fH) // interaction with hydrogen
           {
             if(drand() > fcap)
             {  
-//std::cout << "Particle scattered off hydrogen in moderator." << std::endl;
               vn = sqrt(2.0*energy/neut_mass)*lightspeed;
-//std::cout << "Incoming particle velocity = " << vn << std::endl;
               elastic(temp,1,vn,omega);
               energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
-//std::cout << "Outgoing particle velocity = " << vn << std::endl;
-//std::cout << "Outgoing particle energy = " << energy << std::endl;
             }
             else // capture; score estimator, end history, etc. 
             {
               result = 0;
-//std::cout << "Particle was captured in moderator." << std::endl;
               isAlive = false;
             }
           }
           else // interaction with oxygen; all are scatters
           {
-//std::cout << "Particle scattered off oxygen in moderator." << std::endl;
             vn = sqrt(2.0*energy/neut_mass)*lightspeed;
             elastic(temp,16,vn,omega);
             energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
-//std::cout << "Outgoing particle velocity = " << vn << std::endl;
-//std::cout << "Outgoing particle energy = " << energy << std::endl;
           }
           break;
         default:
@@ -256,64 +208,25 @@ int particle::simulate()
   return result;
 }
 
-int particle::getID()
-{
-  return cellid;
-}
-
-double particle::getCoord(int index)
-{
-  return position[index];
-}
-
-double fission::getCoord(int index)
-{
-  return position[index];
-}
-
-double particle::Direction(int index)
-{
-  return omega[index];
-}
-
-void particle::moveParticle(double dist)
-{
-  for(int i = 0; i < 3; i++)
-  {
-    position[i] += dist*omega[i];
-  }
-  return;
-}
-fission fissionNeutron(particle neutron)
-{
-  double tmp[3];
-  for(int i = 0; i < 3; i++)
-  {
-    tmp[i] = neutron.getCoord(i);
-  }
-//  fission fissNeutron = fission(tmp);
-//  return fissNeutron;
-  return fission(tmp,0);
-}
-
-void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &sourceBank, int batch_size)
+void makeSource(std::vector<fission> &fissionBank, 
+    std::vector<particle> &sourceBank, int batch_size)
 {
   double sourceProb, xi;
-  double xyz[3];
+  fission* fissptr;
+
   if (fissionBank.size() > batch_size) // Fission bank is too large
   {
     //Add neutrons to source bank with probability batch_size/fissionBank.size()
     while(!fissionBank.empty())
     {
       xi = drand(); 
-      sourceProb = static_cast<double>((batch_size-sourceBank.size())/fissionBank.size());
+      sourceProb = static_cast<double>((batch_size-sourceBank.size())/
+        fissionBank.size());
       if(xi < sourceProb)
       {
-        for(int i = 0; i < 3; i++)
-        {
-          xyz[i] = (fissionBank.back()).getCoord(i);
-        }
-        sourceBank.push_back(particle(xyz,2*pi*drand(),2*drand()-1.0,Watt(),0));
+        fissptr = &fissionBank.back();
+        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+          1.0,Watt(),0));
       }
       fissionBank.pop_back();
     }
@@ -325,12 +238,9 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
     {
       for(int k = 0; k < fissionBank.size(); k++)
       {
-        for(int i = 0; i < 3; i++)
-        {
-          xyz[i] = (fissionBank.back()).getCoord(i);
-        }
-        sourceBank.push_back(particle(xyz,2*pi*drand(),2*drand()-1.0,Watt(),0));
-//std::cout << "Cell ID = " << (*sourceBank.back()).getID() << std::endl;
+        fissptr = &fissionBank.back();
+        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+          1.0,Watt(),0));
       }
     }
     while(!fissionBank.empty())
@@ -340,42 +250,14 @@ void makeSource(std::vector<fission> &fissionBank, std::vector<particle> &source
                    static_cast<double>(fissionBank.size());
       if(xi < sourceProb)
       {
-        for(int i = 0; i < 3; i++)
-        {
-          xyz[i] = (fissionBank.back()).getCoord(i);
-        }
-        sourceBank.push_back(particle(xyz,2*pi*drand(),2*drand()-1.0,Watt(),0));
-//std::cout << "Cell ID = " << (*sourceBank.back()).getID() << std::endl;
+        fissptr = &fissionBank.back();
+        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+          1.0,Watt(),0));
       }
       fissionBank.pop_back();
     }
   }
   return;
-}
-
-double particle::getTL(void)
-{
-  return estimatorTL;
-}
-
-double particle::getColl(void)
-{
-  return estimatorColl;
-}
-
-double particle::getTLsq(void)
-{
-  return squareTL;
-}
-
-double particle::getCollsq(void)
-{
-  return squareColl;
-}
-
-double particle::getWeight(void)
-{
-  return weight;
 }
 
 double calcEntropy(std::vector<fission> fissionBank)
@@ -396,15 +278,15 @@ double calcEntropy(std::vector<fission> fissionBank)
   // uniform axial bins, equal-area radial bins
   double p_rad, pn;
   double x, y;
-//  double x, y;
   int z_index, r_index;
   for(int i = 0; i < fissionBank.size(); i++){
-    x = fissionBank[i].getCoord(0);
-    y = fissionBank[i].getCoord(1);
+    x = fissionBank[i].position[0];
+    y = fissionBank[i].position[1];
     p_rad = x*x + y*y;
     r_index = (int)(p_rad/area);
-    z_index = (int)fissionBank[i].getCoord(2)/dz;
-    particle_mesh[nrad*z_index + nrad] = particle_mesh[nrad*z_index + nrad] + 1;
+    z_index = (int)fissionBank[i].position[2]/dz;
+    particle_mesh[nrad*z_index + r_index] = 
+      particle_mesh[nrad*z_index + r_index] + 1;
   }
   // calculate Shannon entropy
   double entropy = 0.0;
