@@ -453,6 +453,13 @@ double calcEntropy(std::vector<fission> fissionBank)
     y = fissionBank[i].position[1];
     p_rad = x*x + y*y;
     r_index = (int)(p_rad/area);
+    if(r_index >= nrad)
+    {
+      std::cout << "Outside of the fuel region" << std::endl;
+      std::cout << "x = " << fissionBank[i].position[0] << std::endl;
+      std::cout << "y = " << fissionBank[i].position[1] << std::endl;
+      std::cout << "z = " << fissionBank[i].position[2] << std::endl;
+    }
     z_index = (int)fissionBank[i].position[2]/dz;
     particle_mesh[nrad*z_index + r_index] = 
       particle_mesh[nrad*z_index + r_index] + 1;

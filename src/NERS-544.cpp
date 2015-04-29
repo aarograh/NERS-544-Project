@@ -124,14 +124,14 @@ int main()
     }
 
     // Calculate Shannon Entropy
-    ShannonEntropy[k] = calcEntropy(fissionBank);
+    ShannonEntropy[k-1] = calcEntropy(fissionBank);
     // let a few cycles go by before starting to calculate the mean
     if(k > inactive_iters)
     {
-      totalEntropy = totalEntropy + ShannonEntropy[k];
+      totalEntropy = totalEntropy + ShannonEntropy[k-1];
       meanEntropy = totalEntropy/(double)(k-inactive_iters);
       l = l+1; // power iterations with converged source
-      if (l >= active_iters) break;
+//      if (l >= active_iters) break;
     }
 
     // Calculations for output
@@ -162,7 +162,7 @@ int main()
       sigtop << endl;
     cout << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
       << sigbottom << endl;
-    cout << "Shannon Entropy: " << ShannonEntropy[k] << endl;
+    cout << "Shannon Entropy: " << ShannonEntropy[l] << endl;
     cout << "Active cycle: " << l << endl;
     cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
 
