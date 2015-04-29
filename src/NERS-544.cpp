@@ -29,7 +29,7 @@ int main()
   init_materials(fuelid, modid);
   initPinCell(pitch, fuelid, modid);
 
-  int batch_size = 1E3;
+  int batch_size = 1E5;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
@@ -81,13 +81,8 @@ int main()
       // Get pointer to particle
       neutron = sourceBank.back();
       // Simulate particle
-/*if (fissionBank.size() == 29923)
-{
-  cout << "Wait here" << endl;
-// Neutron is getting outside the box somehow.  Need to understand what's happening there.
-}*/
-//      result = neutron.simulate(pitch);
-      result = neutron.simulate_implicit(pitch);
+//      result = neutron.simulate_implicit(pitch);
+      result = neutron.simulate(pitch);
       // Create fission neutrons (if fissions > 0)
       if(result > 0)
       { 
