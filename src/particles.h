@@ -13,6 +13,8 @@ class particle{
     double omega[3];
     double energy;
     double score;
+    double cutoff;
+    double survival;
     double totalXS,f235,f238,fH,fcap,fiss_frac,abs_frac;
   
   public:
@@ -21,10 +23,8 @@ class particle{
     double getCoord(int);
     int simulate();
     int simulate_implicit();
-    void roulette();
+    bool roulette();
     double weight;
-    double cutoff;
-    double survival;
     double estimatorTL,squareTL,estimatorColl,squareColl;
     friend class fission;
 };

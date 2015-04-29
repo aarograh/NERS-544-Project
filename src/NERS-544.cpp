@@ -29,7 +29,7 @@ int main()
   init_materials(fuelid, modid);
   initPinCell(pitch, fuelid, modid);
 
-  int batch_size = 1E5;
+  int batch_size = 1E3;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
