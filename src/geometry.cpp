@@ -379,7 +379,8 @@ void initPinCell(double pitch, int fuelid, int modid)
 
 // Build the fuel pin
   // Construct cylinder for fuel pin
-  surfaceList.push_back(new cylinder(surfaceList.size(),0.0,0.0,0.0,radius,-1));
+  surfaceList.push_back(new cylinder(surfaceList.size(),0.0,0.0,0.0,radius,
+    -1));
   // Construct top plane
   surfaceList.push_back(new plane(surfaceList.size(),height,zplane,0));
   // Construct bottom plane

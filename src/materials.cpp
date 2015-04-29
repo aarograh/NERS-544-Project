@@ -76,7 +76,7 @@ fuel::fuel(int matid)
   rwidth[1] = 3.0E-08;
   rwidth[2] = 1.0E-07;
   
-  dres = 100; // practical width of resonance, we should play with this parameter
+  dres = 100; // practical width of resonance
 
   // isotope number densities in atoms/(b*cm)
   fueldens[0] = 4.7284E-02;
@@ -249,7 +249,8 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
     sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
   double Ty = mutil*d_n[1] + (d_n[1]*d_n[2]*cos(gamma) + d_n[0]*sin(gamma)*
     sqrt((1-mutil*mutil)/(1-d_n[2]*d_n[2])));
-  double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*(1-d_n[2]*d_n[2]));
+  double Tz = mutil*d_n[2] - cos(gamma)*sqrt((1-mutil*mutil)*
+    (1-d_n[2]*d_n[2]));
 
   // center-of-mass velocity u_xyz
   double ux = (v_n*d_n[0] + A*Vtil*Tx)/(1+A);  

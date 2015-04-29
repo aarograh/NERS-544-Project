@@ -10,8 +10,8 @@
 #include "particles.h"
 #include "utils.h"
 
-particle::particle(const double pos_in[3], double gamma, double mu, double E_in,
-    int cellid_in)
+particle::particle(const double pos_in[3], double gamma, double mu,
+  double E_in, int cellid_in)
 {
   cellid = cellid_in;
   isAlive = true;
@@ -143,7 +143,8 @@ int particle::simulate(double pitch)
       switch(cellptr->id)
       { 
         case fuelid:
-          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,&fiss_frac);
+          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,
+            &fiss_frac);
           // tally the track length estimator and the collision estimator
           if(cellptr->id == fuelid)
           {
@@ -216,7 +217,7 @@ void makeSource(std::vector<fission> &fissionBank,
 
   if (fissionBank.size() > batch_size) // Fission bank is too large
   {
-    //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    // Add to source bank with probability batch_size/fissionBank.size()
     while(!fissionBank.empty())
     {
       xi = drand(); 
@@ -225,22 +226,22 @@ void makeSource(std::vector<fission> &fissionBank,
       if(xi < sourceProb)
       {
         fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
-          1.0,Watt(),0));
+        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),
+          2*drand() - 1.0,Watt(),0));
       }
       fissionBank.pop_back();
     }
   }
   else if (fissionBank.size() < batch_size) // Fission bank is too small
   {
-    //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    // Add to source bank with probability batch_size/fissionBank.size()
     for(int j = 0; j < (int)(batch_size/fissionBank.size()); j++)
     {
       for(int k = 0; k < fissionBank.size(); k++)
       {
         fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
-          1.0,Watt(),0));
+        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),
+          2*drand() - 1.0,Watt(),0));
       }
     }
     while(!fissionBank.empty())
@@ -251,8 +252,8 @@ void makeSource(std::vector<fission> &fissionBank,
       if(xi < sourceProb)
       {
         fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
-          1.0,Watt(),0));
+        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),
+          2*drand() - 1.0,Watt(),0));
       }
       fissionBank.pop_back();
     }
