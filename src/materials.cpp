@@ -101,7 +101,7 @@ void init_materials(int& fuelid, int& modid)
 // Clears the material pointers
 void clearMaterials()
 {
-  for (int i = 0; i < materialList.size(); i++)
+  while(!materialList.empty())
   {
     delete materialList.back();
     materialList.pop_back();

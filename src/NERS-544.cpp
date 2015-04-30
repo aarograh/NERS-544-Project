@@ -31,10 +31,10 @@ int main()
 
   // Set up batch size and declare neutron-related variables
   int batch_size = 1E3;
-  double En;
-  double xyz[3];
+  double En = 0.0;
+  double xyz[3]; fill_n(xyz,3,0.0);
   double pinrad = 1.5; // pin radius = 1.5 cm
-  double r, gamma, mu;
+  double r = 0.0, gamma = 0.0, mu = 0.0;
   vector<particle> sourceBank;
   vector<fission> fissionBank;
   
@@ -52,7 +52,7 @@ int main()
   particle neutron = particle(xyz,gamma,mu,En,topSurf);
 
   // outer loop over power iterations
-  const int max_iters = 200, active_iters = 180, inactive_iters = 20;
+  const int max_iters = 2, active_iters = 1, inactive_iters = 1;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy;
   int k = 0, l = 0, result, ktot = 0;
