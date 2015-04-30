@@ -331,7 +331,8 @@ int particle::simulate_implicit()
           isAlive = false;
         }
         weight = weight*(1.0-abs_frac);
-//        std::cout << "Implicit capture: absorption fraction = " << abs_frac << std::endl;
+//        std::cout << "Implicit capture: absorption fraction = " \
+  << abs_frac << std::endl;
         if(weight < cutoff)
         { 
           isAlive = roulette();
@@ -397,8 +398,8 @@ void makeSource(std::vector<fission> &fissionBank,
   {
     while(!fissionBank.empty())
     {
-      sourceBank.push_back(particle((fissionBank.back()).position,2.0*pi*drand(),2.0*drand()-
-        1.0,Watt(),0)); 
+      sourceBank.push_back(particle((fissionBank.back()).position,
+        2.0*pi*drand(),2.0*drand()-1.0,Watt(),0)); 
       fissionBank.pop_back();
     }
   }
@@ -412,8 +413,8 @@ void makeSource(std::vector<fission> &fissionBank,
                    static_cast<double>(fissionBank.size()));
       if(xi < sourceProb)
       {
-        sourceBank.push_back(particle((fissionBank.back()).position,2.0*pi*drand(),2.0*drand()-
-          1.0,Watt(),0));
+        sourceBank.push_back(particle((fissionBank.back()).position,
+          2.0*pi*drand(),2.0*drand()-1.0,Watt(),0));
       }
       fissionBank.pop_back();
     }
@@ -425,8 +426,8 @@ void makeSource(std::vector<fission> &fissionBank,
     {
       for(int k = 0; k < fissionBank.size(); k++)
       {
-        sourceBank.push_back(particle(fissionBank[k].position,2.0*pi*drand(),2.0*drand()-
-          1.0,Watt(),0));
+        sourceBank.push_back(particle(fissionBank[k].position,2.0*pi*drand(),
+          2.0*drand()-1.0,Watt(),0));
       }
     }
     while(!fissionBank.empty())
@@ -436,8 +437,8 @@ void makeSource(std::vector<fission> &fissionBank,
                    static_cast<double>(fissionBank.size());
       if(xi < sourceProb)
       {
-        sourceBank.push_back(particle((fissionBank.back()).position,2.0*pi*drand(),2.0*drand()-
-          1.0,Watt(),0));
+        sourceBank.push_back(particle((fissionBank.back()).position,
+          2.0*pi*drand(),2.0*drand()-1.0,Watt(),0));
       }
       fissionBank.pop_back();
     }

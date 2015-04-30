@@ -148,7 +148,8 @@ int main()
           tally_TL = tally_TL + neutron.estimatorTL;
           tally_coll = tally_coll + neutron.estimatorColl;
           tally_TLsq = tally_TLsq + neutron.estimatorTL*neutron.estimatorTL;
-          tally_collsq = tally_collsq + neutron.estimatorColl*neutron.estimatorColl;
+          tally_collsq = tally_collsq + neutron.estimatorColl*
+            neutron.estimatorColl;
 
           // Calculate Leakages
           if(result == topSurf)
@@ -196,8 +197,8 @@ int main()
 
       // Do some output
       cout << "Source iteration: " << k << endl;
-      cout << "rough keff estimate = " << (double)(ktot)/(double)(batch_size*k) 
-        << endl;
+      cout << "rough keff estimate = " << (double)(ktot)/
+        (double)(batch_size*k) << endl;
       cout << "track length keff estimate = " << keff_TL << ", uncertainty = " 
         << sigTL << endl;
       cout << "collision keff estimate = " << keff_Coll << ", unceratainty = " 
@@ -208,7 +209,8 @@ int main()
         << sigbottom << endl;
       cout << "Shannon Entropy: " << ShannonEntropy[k-1] << endl;
       cout << "Active cycle: " << l << endl;
-      cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
+      cout << "Fission bank has " << fissionBank.size() << " neutrons." 
+        << endl;
 
       // Make Source Bank
       cout << "Making source bank from fission bank..." << endl;
@@ -234,7 +236,8 @@ int main()
     spectrum << "Pin pitch = " << endl;
     spectrum << "Active cycles: " << active_iters << endl;
     spectrum << "Inactive cycles: " << inactive_iters << endl;
-    spectrum << " Energy " << " fuel spectrum " << " moderator spectrum " << endl;
+    spectrum << " Energy " << " fuel spectrum " << " moderator spectrum " \
+      << endl;
     for(int g = 0; groups; g++)
     {
       spectrum << energyGrid[g] << fuelSpectrum[g] << modSpectrum[g] << endl; 
