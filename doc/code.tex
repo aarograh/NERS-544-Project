@@ -1,4 +1,4 @@
-The code used for this project was written using C++.  It was broken into five distinct pieces in order to maintain organization and at least some level of abstraction.  Each of these pieces will be described in sections \ref{ss:utils}-\ref{ss:driver}.
+The code used for this project was written using C++.  It was broken into five distinct pieces in order to maintain organization and a moderate degree of abstraction.  Each of these pieces will be described in sections \ref{ss:utils}-\ref{ss:driver}.
 
 \subsection{Utils}\label{ss:utils}
 
@@ -12,19 +12,100 @@ This module contains functions which will be needed throughout the code and are 
 
 In addition to these functions, the header file for Utils also defines many constants for use in the code, such as pi, the mass of a neutron, the Boltzmann constant, and others used for various parts of the code.
 
+The header file is found in Appendix A, and the source code in Appendix B.
+
 \subsection{Geometry}\label{ss:geometry}
 
+The second module is the geometry module.  This defines all the functions required for two main classes: \textit{cell} and \textit{surface}.
 
+The \textit{surface} class has two sub-classes: \textit{plane} and \textit{cylinder}.  The \textit{plane} class assumes that the plane is perpendicular to one of the three coordinate axes.  This assumption could easily be generalized, but was made to simplify this problem.  The plane is then defined by a point on the plane and the normal vector for the plane.  The \textit{cylinder} class assumes that the cylinder has some origin, a radius, and an axis which extends parallel to the $z$-axis.  Thus, no rotation of the cylinder is allowed.
+
+Both sub-classes of the \textit{surface} class implement several important functions:
+
+\begin{itemize}
+\item \textit{double distToIntersect(double*, double*)} -- This function takes a position and direction as input arguments.  It then calculate the distance from the position to the surface along the given direction.  The distances might be negative.
+\item \textit{void reflect(double*, double*)} -- This function takes a position and direction.  The direction is modified as if it had reflected off the surface.
+\item \textit{int getSense(double*)} -- This function takes a 3D point and returns 1 or -1, depending on where the point is.  For a \textit{plane} class, 1 denotes being on the ``positive'' side of the plane and -1 on the ``negative'' side (with respect to the axis that the plane is perpendicular to), while for a \textit{cylinder} class, 1 denotes being outside the cylinder and -1 denotes being inside it.
+\end{itemize}
+
+The \textit{cell} class is defined mostly in terms of surfaces.  It contains a vector of \textit{surface} ID numbers, \textit{iSurfs}, and \textit{senses}, which contains a 1 or -1 for each surface to indicate which side of the surface the cell is on.  It also contains a \textit{material} ID number, and a \textit{distToIntersect} function, which simply calls the corresponding function on each of the \textit{cell}'s \textit{surface} classes and returns the minimum positive distance.
+
+This module also contains two vectors of pointers: one for each \textit{surface} that has been created, and the other for each \textit{cell} that has been created.  The routines \textit{getPtr{\_}cell(int)} and \textit{getPtr{\_}surface(int)} each return a pointer from one of these lists when given an ID number.
+
+The header file is found in Appendix C, and the source file in Appendix D.
 
 \subsection{Materials}\label{ss:materials}
 
+This module contains definitions for the \textit{moderator} and \textit{fuel} classes.  While these classes technically share a superclass \textit{material}, it ended up being simpler for them to be mostly separate.
 
+The \textit{moderator} class contains variables for the oxygen and hydrogen number densities and cross-section (scattering and aborption) parameters.  It also has a function \textit{void modMacro(double, double*, double*, double*)} which, given an energy, returns the total cross-section, the probability of interaction with hydrogen, and the total absorption probability.  These are used to correctly move particles around and perform the interaction physics in the moderator.
+
+The \textit{fuel} class has similar information, but for oxygen, U-235, and U-238.  It also contains fission cross-section and resonance information, which the \textit{moderator} class does not require.  This class has three main methods defined:
+
+\begin{itemize}
+\item \textit{void fuelMacro(double, double*, double*, double*)} -- Similar to its \textit{moderator} counterpart, it returns the total cross-section and other information about interaction probabilities.
+\item \textit{int sample{\_}U(double, double*, double*, double*, double*)} -- This function uses a random number to determine which isotope of the fuel the neutron is interacting with, and sets appropriate probabilities of absorption and fission based on that result.
+\item \textit{double fissXS(double)} -- This function claculates the fission cross-section of U-235 given a particular energy.
+\end{itemize}
+
+In addition to these class definitions, this module also contains a routine \textit{void init{\_}materials(int\& , int\& )} which sets up the fuel and moderator materials.  It also defines a function \textit{void elastic(const double, int, double\& , double[3])}, which performs elastic scattering off a material.  There is also a \textit{getPtr{\_}material} function which ended up not being used due to how the materials were defined.
+
+The header file is found in Appendix E, and the source is in Appendix F.
 
 \subsection{Particles}\label{ss:particles}
 
+This module contains a definition of the \textit{particle} and \textit{fission} classes.  The \textit{particle} class contains the position, direction, and energy of the neutron.  It also contains a logical value \textit{isAlive} to indicate when the simulation of the particle should stop, and some information about the interaction probabilities and track-length and collision estimators.  It also contains a method \textit{int simulate()}, which simulates the entire life of the particle.  The return value can represent one of three possible quantities, depending on what range it falls in:
 
+\begin{itemize}
+\item $return == 0$ -- Particle was absorbed, so nothing is done with the result.
+\item $return > 0$ -- The particle caused fission, and the return value contains the number of fission neutrons which is produces.
+\item $return < 0$ -- the particle escaped, and the return value contains the negative of the surface ID across which it leaked.
+\end{itemize}
+
+The \textit{fission} class contains a position of the neutron which caused the fission, which can be used to generate a new \textit{particle} class for the next batch of simulations.  This prevents having to pass the entire particle around once its simulation is over.
+
+There are also two important functions defined in this module:
+
+\begin{itemize}
+\item \textit{void makeSource(std::vector$<$fission$>$\& , std::vector$<$particle$>$\& , int)} -- This function takes in the fission bank which was generated by a previous iteration and populates the new source bank with neutrons.  If the fission bank is too large, it randomly samples it to get the correct number.  If it is too small, it randomly samples extra fission locations from the fission bank.  In either case, the resulting source bank will be a constant size.
+\item \textit{double calcEntropy(std::vector$<$fission$>$)} -- This function takes in the fission bank and calculates the Shannon entropy for the previous iteration.
+\end{itemize}
+
+The header file is found in Appendix G, and the source in Appendix H.
 
 \subsection{Driver}\label{ss:driver}
 
+The driver contains the actual iteration logic to solve the problem.  The problem was solved by performing a power iteration beginning with an initial source bank of neutrons which were uniformly sampled within the fuel region.  Since the neutrons are representative of fission neutrons, their direction was sampled isotropically and their energy was sampled from the Watt Spectrum.  After the first iteration, the source bank was populated from the fissions occurring in the previous iteration.  The full algorithm for the code is shown below:
 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{l}{Iteration Algorithm} \\ \hline\hline
+1.  & Seed random number generator using current time \\
+2.  & Accept user input of pin pitch \\
+3.  & Set up materials \\
+4.  & Set up geometry \\
+5.  & \textit{batch{\_}size} $=10^5$ \\
+6.  & \textit{for i $=$ 1 to batch{\_}size, do:} \\
+7.  & \quad Randomly sample position, direction, and energy for neutron \\
+8.  & \quad Add neutron to source bank \\
+9.  & Initialize estimators to 0 \\
+10. & \textit{active{\_}cycles $=70$}; \textit{inactive{\_}cycles $=30$} \\
+11. & \textit{for i $=$ 1 to active{\_}cycles + inactive{\_}cycles, do:} \\
+12. & \quad \textit{while source bank is empty, do:} \\
+13. & \quad\quad Remove neutron from bank and simulate it \\
+14. & \quad\quad If neutron caused fission, at fissions to fission bank \\
+15. & \quad\quad Accumulate k-eff estimators for this iteration \\
+16. & \quad\quad Destroy particle \\
+17. & \quad Calculate Shannon Entropy \\
+18. & \quad If $i > $\textit{inactive{\_}cycles}, accumulate estimators \\
+19. & \quad Output updated results \\
+20. & Exit.
+\end{tabular}
+\end{center}
+
+All of these steps are performed using functions described in the earlier modules.  The track-length and collision estimators are accumulated for each neutron as it moves throughout the pin cell and interacts with the materials.  The leakage estimators and number of fission neutrons are calculated using the return value of the \textit{particle::simulate()} routine.
+
+The number of active and inactive cycles used is an inexact science.  The values we selected were determined from running several different problems and observing when the Shannon Entropy and leakage estimates seemed to stabilize.  Running 30 inactive cycles before beginning tallies seemed to consistently be a minimal but sufficiently large number of cycles to keep any initial biases out of the final tally results for any reasonable pin pitch.
+
+The driver source code is found in Appendix I.
 

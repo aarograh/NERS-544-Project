@@ -14,8 +14,8 @@ double fuelSpectrum[1001];
 double modSpectrum[1001];
 double energyGrid[1001];
 
-particle::particle(const double pos_in[3], double gamma, double mu, double E_in,
-    int cellid_in)
+particle::particle(const double pos_in[3], double gamma, double mu,
+  double E_in, int cellid_in)
 {
   cellid = cellid_in;
   isAlive = true;
@@ -149,6 +149,8 @@ int particle::simulate()
       switch(cellptr->id)
       { 
         case fuelid:
+          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,
+            &fiss_frac);
           // tally the track length estimator and the collision estimator
           score = dcoll*weight*nu*fiss_frac*totalXS;
           //std::cout << "Particle weight = " << weight << std::endl;
@@ -403,7 +405,7 @@ void makeSource(std::vector<fission> &fissionBank,
   }
   else if (fissionBank.size() > batch_size) // Fission bank is too large
   {
-    //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    // Add to source bank with probability batch_size/fissionBank.size()
     while(!fissionBank.empty())
     {
       xi = drand(); 
@@ -420,7 +422,7 @@ void makeSource(std::vector<fission> &fissionBank,
   }
   else if (fissionBank.size() < batch_size) // Fission bank is too small
   {
-    //Add neutrons to source bank with probability batch_size/fissionBank.size()
+    // Add to source bank with probability batch_size/fissionBank.size()
     for(int j = 0; j < (int)(batch_size/fissionBank.size()); j++)
     {
       for(int k = 0; k < fissionBank.size(); k++)
