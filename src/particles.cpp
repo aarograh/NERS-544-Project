@@ -14,7 +14,7 @@ double fuelSpectrum[1001];
 double modSpectrum[1001];
 double energyGrid[1001];
 
-particle::particle(const double pos_in[3], double gamma, double mu,
+particle::particle(double pos_in[3], double gamma, double mu,
   double E_in, int cellid_in)
 {
   cellid = cellid_in;
@@ -149,8 +149,7 @@ int particle::simulate()
       switch(cellptr->id)
       { 
         case fuelid:
-          isotope = thisFuel->sample_U(energy,&f235,&f238,&abs_frac,
-            &fiss_frac);
+          isotope = thisFuel->sample_U(&f235,&f238);
           // tally the track length estimator and the collision estimator
           score = dcoll*weight*nu*fiss_frac*totalXS;
           //std::cout << "Particle weight = " << weight << std::endl;
@@ -257,7 +256,7 @@ int particle::simulate_implicit()
     // Move particle to surface
     if (dsurf < dcoll)
     {
-      spectrumTally(energy,dsurf*weight,cellptr->id);
+      //spectrumTally(energy,dsurf*weight,cellptr->id);
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
@@ -310,7 +309,7 @@ int particle::simulate_implicit()
       position[2] += omega[2]*dcoll;
       if(cellptr->id == fuelid)
       { 
-        spectrumTally(energy,dcoll*weight,fuelid);
+        //spectrumTally(energy,dcoll*weight,fuelid);
         isotope = thisFuel->sample_U(&f235,&f238);
         // tally the track length estimator and the collision estimator
         score = dcoll*weight*nu*fiss_frac*totalXS;
@@ -340,7 +339,7 @@ int particle::simulate_implicit()
       }
       else if(cellptr->id == modid)
       {
-        spectrumTally(energy,dcoll*weight,modid);
+        //spectrumTally(energy,dcoll*weight,modid);
         if(drand() < fH) // interaction with hydrogen
         {
           isotope = 1;
@@ -413,8 +412,7 @@ void makeSource(std::vector<fission> &fissionBank,
                    static_cast<double>(fissionBank.size()));
       if(xi < sourceProb)
       {
-        fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2.0*pi*drand(),2.0*drand()-
+        sourceBank.push_back(particle((fissionBank.back()).position,2.0*pi*drand(),2.0*drand()-
           1.0,Watt(),0));
       }
       fissionBank.pop_back();
@@ -427,8 +425,7 @@ void makeSource(std::vector<fission> &fissionBank,
     {
       for(int k = 0; k < fissionBank.size(); k++)
       {
-        fissptr = &fissionBank[k];
-        sourceBank.push_back(particle(fissptr->position,2.0*pi*drand(),2.0*drand()-
+        sourceBank.push_back(particle(fissionBank[k].position,2.0*pi*drand(),2.0*drand()-
           1.0,Watt(),0));
       }
     }
@@ -439,8 +436,7 @@ void makeSource(std::vector<fission> &fissionBank,
                    static_cast<double>(fissionBank.size());
       if(xi < sourceProb)
       {
-        fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2.0*pi*drand(),2.0*drand()-
+        sourceBank.push_back(particle((fissionBank.back()).position,2.0*pi*drand(),2.0*drand()-
           1.0,Watt(),0));
       }
       fissionBank.pop_back();

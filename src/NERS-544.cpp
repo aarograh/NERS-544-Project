@@ -16,8 +16,8 @@ using namespace std;
 int main()
 {
 //  srand(time(NULL));
-  //srand(101230489);
-  srand(23549);
+  srand(101230489);
+//  srand(23549);
 
   int fuelid, modid;
   double pitch;
