@@ -333,7 +333,7 @@ int particle::simulate_implicit()
         weight = weight*(1.0-abs_frac);
 //        std::cout << "Implicit capture: absorption fraction = " \
   << abs_frac << std::endl;
-        if(weight < cutoff)
+        if(weight < cutoff && isAlive)
         { 
           isAlive = roulette();
         }
@@ -382,8 +382,8 @@ bool particle::roulette()
   }
   else
   {
-//    std::cout << "The particle was killed in rouletting with a weight of "
-//              << weight << std::endl;
+    std::cout << "The particle was killed in rouletting with a weight of "
+              << weight << std::endl;
     weight = 0.0;
     return false;
   }
