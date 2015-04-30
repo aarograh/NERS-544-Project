@@ -43,9 +43,7 @@ particle::particle(double pos_in[3], double gamma, double mu,
 
   score = 0.0;
   estimatorTL = 0.0;
-  //squareTL = 0.0;
   estimatorColl = 0.0;
-  //squareColl = 0.0;
 }
 
 fission::fission(const particle& neutron, int cellid_in)
@@ -87,7 +85,6 @@ int particle::simulate()
       exit(-3);
     }
     // get distance to next collision
-    //dcoll = 500.0; // Just to test the surface/cell stuff
     dcoll = -log(drand())/(totalXS);
     // Get closest surface distance
     dsurf = cellptr->distToIntersect(position, omega, intersection, surfid);
@@ -155,16 +152,9 @@ int particle::simulate()
           isotope = thisFuel->sample_U(&f235,&f238);
           // tally the track length estimator and the collision estimator
           score = dcoll*weight*nu*fiss_frac*totalXS;
-          //std::cout << "Particle weight = " << weight << std::endl;
-	  //std::cout << "absorption fraction = " << abs_frac << std::endl;
-	  //std::cout << "fission fraction = " << fiss_frac << std::endl;
-          //std::cout << "total XS = " << totalXS << std::endl;
           estimatorTL = estimatorTL + score;
-          //squareTL = squareTL + score*score;
           score = weight*nu*fiss_frac;
-          //std::cout << "Score added = " << score << std::endl;
           estimatorColl = estimatorColl + score;
-          //squareColl = squareColl + score*score;
 
           xi = drand();
           if(xi > abs_frac) // scatter
@@ -251,7 +241,6 @@ int particle::simulate_implicit()
       exit(-3);
     }
     // get distance to next collision
-    //dcoll = 500.0; // Just to test the surface/cell stuff
     dcoll = -log(drand())/(totalXS);
     // Get closest surface distance
     dsurf = cellptr->distToIntersect(position, omega, intersection, surfid);
@@ -265,7 +254,6 @@ int particle::simulate_implicit()
       {
         score = dsurf*weight*nu*fiss_frac*totalXS;
         estimatorTL = estimatorTL + score;
-        //squareTL = squareTL + score*score;
       }
       // Move particle
       position[0] = intersection[0];
@@ -317,10 +305,8 @@ int particle::simulate_implicit()
         // tally the track length estimator and the collision estimator
         score = dcoll*weight*nu*fiss_frac*totalXS;
         estimatorTL = estimatorTL + score;
-        //squareTL = squareTL + score*score;
         score = weight*nu*fiss_frac;
         estimatorColl = estimatorColl + score;
-        //squareColl = squareColl + score*score;
 
         xi = drand();
 
@@ -329,13 +315,10 @@ int particle::simulate_implicit()
         energy = neut_mass*(vn/lightspeed)*(vn/lightspeed)/2.0; 
         if(xi < fiss_frac)
         {
-//          std::cout << "Particle fissioned." << std::endl;
           result = static_cast<int>(weight*nu+drand());
           isAlive = false;
         }
         weight = weight*(1.0-abs_frac);
-//        std::cout << "Implicit capture: absorption fraction = " \
-  << abs_frac << std::endl;
         if(weight < cutoff && isAlive)
         { 
           isAlive = roulette();

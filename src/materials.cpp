@@ -193,14 +193,6 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
     transform1 = true;
   }
 
-//  std::cout << "Incoming neutron: " << std::endl;
-//  std::cout << "velocity = " << v_n << std::endl;
-//  std::cout << "omegax = " << d_n[0] << std::endl;
-//  std::cout << "omegay = " << d_n[1] << std::endl;
-//  std::cout << "omegaz = " << d_n[2] << std::endl;
-
-//  std::cout << "beta = " << beta <<  std::endl;
-//  std::cout << std::endl;
   double x;
   double y = beta*v_n;
   double w1 = sqrt(pi)*y/(2 + sqrt(pi)*y);
@@ -227,10 +219,6 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
     eta = drand();   
     f1 = sqrt(v_n*v_n + Vtil*Vtil - 2*v_n*Vtil*mutil)/(v_n+Vtil);
   }
-//  std::cout << "isotope = " << A << std::endl;
-//  std::cout << "Vtil = " << Vtil << std::endl;
-//  std::cout << "mutil = " << mutil << std::endl;
-//  std::cout << std::endl;
   
   // sample direction vector for the target nucleus Omega_T-hat 
   double gamma = 2*pi*drand();
@@ -292,13 +280,6 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   d_n[0] = vncx/v_n;
   d_n[1] = vncy/v_n;
   d_n[2] = vncz/v_n;
-//  std::cout << "Outgoing neutron: " << std::endl;
-//  std::cout << "velocity = " << v_n << std::endl;
-//  std::cout << "omegax = " << d_n[0] << std::endl;
-//  std::cout << "omegay = " << d_n[1] << std::endl;
-//  std::cout << "omegaz = " << d_n[2] << std::endl;
-
-//  std::cout << std::endl;
 
   if(transform1)
   {

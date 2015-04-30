@@ -14,7 +14,7 @@ plane::plane(int surfid, double position, int orientation, int bound_in)
   // Set surface id
   id = surfid;
   // Set normal vector depending on which axis the plane intersects
-  // Only planes which have normal vectors parallel to an axia are
+  // Only planes which have normal vectors parallel to an axis are
   // supported right now.
   switch(orientation)
   {

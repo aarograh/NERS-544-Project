@@ -14,9 +14,7 @@ using namespace std;
 
 int main()
 {
-//  srand(time(NULL));
-  srand(101230489);
-//  srand(23549);
+  srand(time(NULL));
 
   int fuelid, modid;
   double pitch;
@@ -57,8 +55,6 @@ int main()
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy;
   int k = 0, l = 0, result, ktot = 0;
-
-//  double pitches[npitch]  = {3.25,3.5,3.75,4.0,4.25,4.5,4.75,5.0,5.5,6.0};
 
   // make the energy grid for flux tally
   int decades = 10;
@@ -139,7 +135,7 @@ int main()
         // Get pointer to particle
         neutron = sourceBank.back();
         // Simulate particle
-//        result = neutron.simulate_implicit();
+//        result = neutron.simulate_implicit(); //Still not working correctly
         result = neutron.simulate();
         // Create fission neutrons (if fissions > 0)
         if(result > 0)
@@ -205,19 +201,20 @@ int main()
 
       // Do some output
       outfile << "Source iteration: " << k << endl;
-      outfile << "rough keff estimate = " << (double)(ktot)/(double)(batch_size*k) 
-        << endl;
-      outfile << "track length keff estimate = " << keff_TL << ", uncertainty = " 
-        << sigTL << endl;
-      outfile << "collision keff estimate = " << keff_Coll << ", unceratainty = " 
-        << sigColl << endl;
-      outfile << "Top leakage estimate = " << topleak << ", uncertainty = " << 
-        sigtop << endl;
-      outfile << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
-        << sigbottom << endl;
+      outfile << "rough keff estimate = " << 
+        (double)(ktot)/(double)(batch_size*k) << endl;
+      outfile << "track length keff estimate = " << keff_TL << 
+        ", uncertainty = " << sigTL << endl;
+      outfile << "collision keff estimate = " << keff_Coll << 
+        ", unceratainty = " << sigColl << endl;
+      outfile << "Top leakage estimate = " << topleak << ", uncertainty = " 
+        << sigtop << endl;
+      outfile << "Bottom leakage estimate = " << bottomleak << 
+        ", uncertainty = " << sigbottom << endl;
       outfile << "Shannon Entropy: " << ShannonEntropy[k-1] << endl;
       outfile << "Active cycle: " << l << endl;
-      outfile << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
+      outfile << "Fission bank has " << fissionBank.size() << " neutrons."
+        << endl;
 
       // Make Source Bank
       outfile << "Making source bank from fission bank..." << endl;
