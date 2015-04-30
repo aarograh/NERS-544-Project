@@ -47,7 +47,7 @@ The \textit{fuel} class has similar information, but for oxygen, U-235, and U-23
 \item \textit{int sample{\_}U( double*, double*)} -- This function uses a random number to sample an isotope in the fuel off of which the neutron scatters.
 \end{itemize}
 
-In addition to these class definitions, this module also contains a routine \textit{void init{\_}materials(int\& , int\& )} which sets up the fuel and moderator materials.  It also defines a function \textit{void elastic(const double, int, double\& , double[3])}, which performs elastic scattering off a material.  There is also a \textit{getPtr{\_}material} function which ended up not being used due to how the materials were defined.
+In addition to these class definitions, this module also contains a routine \textit{void init{\_}materials(int\& , int\& )} which sets up the fuel and moderator materials; a function \textit{void elastic(const double, int, double\& , double[3])}, which performs elastic scattering off a material; and a function \textit{getPtr{\_}material} function which returns a pointer to the requested material.
 
 The header file is found in Appendix E, and the source is in Appendix F.
 
