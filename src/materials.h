@@ -5,6 +5,7 @@
 class material{
   public:
     int id;
+    virtual void dummy() = 0;
 };
 
 class moderator : public material{
@@ -17,6 +18,7 @@ class moderator : public material{
   public:
     moderator(int);
     void modMacro(double,double*,double*,double*);
+    void dummy(){return;};
 };
 
 class fuel : public material{
@@ -38,8 +40,10 @@ class fuel : public material{
     void fuelMacro(double,double*,double*,double*,double*,double*);
     int sample_U(double*,double*);
     double fissXS(double);
+    void dummy(){return;};
 };
 
 material* getPtr_material(int);
 void elastic(const double,int,double&,double[3]);
 void init_materials(int& fuelid, int& modid);
+void clearMaterials();

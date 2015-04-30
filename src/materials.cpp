@@ -11,6 +11,7 @@
 std::vector<material*> materialList;
 const int O16 = 16, U235 = 235, U238 = 238;
 
+// Constructor for moderator material
 moderator::moderator(int matid)
 {
   id = matid;
@@ -33,6 +34,8 @@ moderator::moderator(int matid)
   moddens[1] = 3.3455E-02;
 
 }
+
+// Constructor for fuel material
 fuel::fuel(int matid)
 {
   id = matid;
@@ -84,6 +87,7 @@ fuel::fuel(int matid)
   fueldens[2] = 2.2696E-02;
 }
 
+// Constructs all materials needed for a problem
 void init_materials(int& fuelid, int& modid)
 {
   fuelid = 0;
@@ -93,6 +97,19 @@ void init_materials(int& fuelid, int& modid)
  
   return;
 }
+
+// Clears the material pointers
+void clearMaterials()
+{
+  for (int i = 0; i < materialList.size(); i++)
+  {
+    delete materialList.back();
+    materialList.pop_back();
+  }
+  return;
+}
+
+// Returns a pointer to a material class
 material* getPtr_material(int matid)
 {
   if (matid < 0 || matid >= materialList.size())
@@ -104,6 +121,7 @@ material* getPtr_material(int matid)
   return materialList.at(matid);
 }
 
+// Performs macroscopic XS calculations for moderator
 void moderator::modMacro(double E, double *totalxs, double *H_frac, 
     double *abs_frac)
 {
@@ -121,6 +139,7 @@ void moderator::modMacro(double E, double *totalxs, double *H_frac,
    return;
 }
 
+// Performs macroscopic XS calculations for fuel
 void fuel::fuelMacro(double E, double *totalxs, double *frac_U235, 
     double *frac_U238, double *fiss_frac, double *abs_frac)
 {
@@ -159,6 +178,7 @@ void fuel::fuelMacro(double E, double *totalxs, double *frac_U235,
   return;
 }
 
+// Samples which isotope of uranium with which an interaction occurred
 int fuel::sample_U(double *frac_U235, double *frac_U238)
 {
   double xi = drand();
@@ -176,6 +196,7 @@ int fuel::sample_U(double *frac_U235, double *frac_U238)
   }
 }
 
+// Performs elastic scattering physics and modified omega
 void elastic(const double T, int A_in, double &v_n, double d_n[3])
 {
   double A = static_cast<double>(A_in);
@@ -291,6 +312,7 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   return;
 }
 
+// Returns the fission XS for the fuel
 double fuel::fissXS(double energy)
 {
   double sqrE = sqrt(energy); 
