@@ -3,7 +3,6 @@
 // DATE   : April 30, 2015
 
 #include <iostream>
-#include <ostream>
 #include <fstream>
 #include <sstream>
 #include "utils.h"
@@ -33,7 +32,7 @@ int main()
 
   init_materials(fuelid, modid);
 
-  int batch_size = 1E5;
+  int batch_size = 1E3;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
@@ -51,6 +50,7 @@ int main()
   double keff_TL, keff_Coll, sigTL, sigColl, active_particles;
   double topleak, bottomleak, sigtop, sigbottom, score = 0.0;
   particle neutron = particle(xyz,gamma,mu,En,fuelid);
+  double fuelVolume = 100.0*pi*1.5*1.5;
 
   // outer loop over power iterations
   const int max_iters = 200, active_iters = 180, inactive_iters = 20;
@@ -63,12 +63,12 @@ int main()
   // make the energy grid for flux tally
   int decades = 10;
   const int groups = 1001;
-  double x = -4;
+  double x = -10;
   double dg = (double)(decades)/(double)(groups-1);
 
   for(int i = 0; i < groups; i++)
   {
-    energyGrid[i] = 20*pow(10,x);
+    energyGrid[i] = 30.0*pow(10,x);
     modSpectrum[i] = 0.0;
     fuelSpectrum[i] = 0.0;
     x = x+dg;
@@ -79,12 +79,13 @@ int main()
   string filename = convert.str();
   ofstream myfile;
   myfile.open(filename.c_str());
-/*
+
   ofstream spectrum;
-  convert << "spectrum." << pitch;
-  string spectrumfile = convert.str();
+  stringstream spec;
+  spec << "spectrum." << pitch;
+  string spectrumfile = spec.str();
   spectrum.open(spectrumfile.c_str());
-*/
+
     initPinCell(pitch, fuelid, modid);
 
     // zero all estimators
@@ -122,7 +123,8 @@ int main()
       sourceBank.push_back(particle(xyz,gamma,mu,En,fuelid));
     }
   
-    while(k < max_iters){
+    while(k < max_iters)
+    {
       k = k+1; // total power iterations 
     
       // inner loop over the source bank
@@ -232,18 +234,18 @@ int main()
     myfile << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
       << sigbottom << endl;
     myfile << endl;
-/*
-    spectrum << "Pin pitch = " << endl;
+
+    spectrum << "Pin pitch = " << pitch << endl;
     spectrum << "Active cycles: " << active_iters << endl;
     spectrum << "Inactive cycles: " << inactive_iters << endl;
-    spectrum << " Energy " << " fuel spectrum " << " moderator spectrum " \
-      << endl;
-    for(int g = 0; groups; g++)
+    spectrum << " Energy " << " fuel spectrum " << " moderator spectrum " 
+             << endl;
+    for(int g = 0; g < groups; g++)
     {
-      spectrum << energyGrid[g] << fuelSpectrum[g] << modSpectrum[g] << endl; 
+      spectrum << "Group " << g << ":\t" <<  energyGrid[g] << "\t\t" <<
+        fuelSpectrum[g] << "\t" << modSpectrum[g] << endl; 
     }
-*/
   myfile.close();
-//  spectrum.close();
+  spectrum.close();
   return 0;
 }

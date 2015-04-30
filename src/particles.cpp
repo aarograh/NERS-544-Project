@@ -95,6 +95,7 @@ int particle::simulate()
     // Move particle to surface
     if (dsurf < dcoll)
     {
+      spectrumTally(energy,dsurf*weight,cellptr->id);
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
@@ -143,6 +144,8 @@ int particle::simulate()
     // Move particle to collision point and sample collision
     else
     {
+      spectrumTally(energy,dcoll*weight,cellptr->id);
+
       position[0] += omega[0]*dcoll;
       position[1] += omega[1]*dcoll;
       position[2] += omega[2]*dcoll;
@@ -256,7 +259,7 @@ int particle::simulate_implicit()
     // Move particle to surface
     if (dsurf < dcoll)
     {
-      //spectrumTally(energy,dsurf*weight,cellptr->id);
+      spectrumTally(energy,dsurf*weight,cellptr->id);
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
@@ -304,12 +307,12 @@ int particle::simulate_implicit()
     // Move particle to collision point and sample collision
     else
     {
+      spectrumTally(energy,dcoll*weight,cellptr->id);
       position[0] += omega[0]*dcoll;
       position[1] += omega[1]*dcoll;
       position[2] += omega[2]*dcoll;
       if(cellptr->id == fuelid)
       { 
-        //spectrumTally(energy,dcoll*weight,fuelid);
         isotope = thisFuel->sample_U(&f235,&f238);
         // tally the track length estimator and the collision estimator
         score = dcoll*weight*nu*fiss_frac*totalXS;
@@ -340,7 +343,6 @@ int particle::simulate_implicit()
       }
       else if(cellptr->id == modid)
       {
-        //spectrumTally(energy,dcoll*weight,modid);
         if(drand() < fH) // interaction with hydrogen
         {
           isotope = 1;
@@ -500,10 +502,10 @@ double calcEntropy(std::vector<fission> fissionBank)
   return entropy;
 }
 
-void particle::spectrumTally(double energy, double fluxTally, int id)
+void spectrumTally(double energy, double fluxTally, int id)
 {
   int g = 0;
-  while(energy > energyGrid[g])
+  while(energy > energyGrid[g] && g < 1000)
   {
     g = g+1;
   }
