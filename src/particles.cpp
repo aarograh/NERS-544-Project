@@ -10,6 +10,10 @@
 #include "particles.h"
 #include "utils.h"
 
+double fuelSpectrum[1001];
+double modSpectrum[1001];
+double energyGrid[1001];
+
 particle::particle(const double pos_in[3], double gamma, double mu, double E_in,
     int cellid_in)
 {
@@ -251,13 +255,13 @@ int particle::simulate_implicit()
     // Move particle to surface
     if (dsurf < dcoll)
     {
+      spectrumTally(energy,dsurf*weight,cellptr->id);
       // tally the track length estimator for keff
       if(cellptr->id == fuelid)
       {
         score = dsurf*weight*nu*fiss_frac*totalXS;
         estimatorTL = estimatorTL + score;
         //squareTL = squareTL + score*score;
-        
       }
       // Move particle
       position[0] = intersection[0];
@@ -304,6 +308,7 @@ int particle::simulate_implicit()
       position[2] += omega[2]*dcoll;
       if(cellptr->id == fuelid)
       { 
+        spectrumTally(energy,dcoll*weight,fuelid);
         isotope = thisFuel->sample_U(&f235,&f238);
         // tally the track length estimator and the collision estimator
         score = dcoll*weight*nu*fiss_frac*totalXS;
@@ -333,6 +338,7 @@ int particle::simulate_implicit()
       }
       else if(cellptr->id == modid)
       {
+        spectrumTally(energy,dcoll*weight,modid);
         if(drand() < fH) // interaction with hydrogen
         {
           isotope = 1;
@@ -390,8 +396,7 @@ void makeSource(std::vector<fission> &fissionBank,
   {
     while(!fissionBank.empty())
     {
-      fissptr = &fissionBank.back();
-      sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+      sourceBank.push_back(particle((fissionBank.back()).position,2.0*pi*drand(),2.0*drand()-
         1.0,Watt(),0)); 
       fissionBank.pop_back();
     }
@@ -403,11 +408,11 @@ void makeSource(std::vector<fission> &fissionBank,
     {
       xi = drand(); 
       sourceProb = static_cast<double>((batch_size-sourceBank.size())/
-        fissionBank.size());
+                   static_cast<double>fissionBank.size());
       if(xi < sourceProb)
       {
         fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+        sourceBank.push_back(particle(fissptr->position,2.0*pi*drand(),2.0*drand()-
           1.0,Watt(),0));
       }
       fissionBank.pop_back();
@@ -420,8 +425,8 @@ void makeSource(std::vector<fission> &fissionBank,
     {
       for(int k = 0; k < fissionBank.size(); k++)
       {
-        fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+        fissptr = &fissionBank[k];
+        sourceBank.push_back(particle(fissptr->position,2.0*pi*drand(),2.0*drand()-
           1.0,Watt(),0));
       }
     }
@@ -433,7 +438,7 @@ void makeSource(std::vector<fission> &fissionBank,
       if(xi < sourceProb)
       {
         fissptr = &fissionBank.back();
-        sourceBank.push_back(particle(fissptr->position,2*pi*drand(),2*drand()-
+        sourceBank.push_back(particle(fissptr->position,2.0*pi*drand(),2.0*drand()-
           1.0,Watt(),0));
       }
       fissionBank.pop_back();
@@ -446,7 +451,7 @@ double calcEntropy(std::vector<fission> fissionBank)
 {
   double radius = 1.5;
   int nrad = 10;
-  int nz = 20;
+  int nz = 100;
   int nbins = nz*nrad;
   int particle_mesh[nbins];
   double dz = 100.0/nz;
@@ -456,6 +461,22 @@ double calcEntropy(std::vector<fission> fissionBank)
     particle_mesh[i] = 0;
   }
   
+  int index;
+  int fissionMesh[50];
+   for(int j = 0; j < 50; j++)
+   {
+     fissionMesh[j] = 0;
+   }
+   for(int n = 0; n < fissionBank.size(); n++)
+   {
+     index = (int)(fissionBank[n].position[2]/2.0);
+     fissionMesh[index] = fissionMesh[index]+1;
+   }
+   for(int j = 0; j < 50; j++)
+   {
+     std::cout << j << "\t" << fissionMesh[j] << std::endl;
+   }
+
   // bin all of the particles
   // uniform axial bins, equal-area radial bins
   double p_rad, pn;
@@ -494,3 +515,20 @@ double calcEntropy(std::vector<fission> fissionBank)
   return entropy;
 }
 
+void particle::spectrumTally(double energy, double fluxTally, int id)
+{
+  int g = 0;
+  while(energy > energyGrid[g])
+  {
+    g = g+1;
+  }
+
+  if(id == 0)
+  {
+    fuelSpectrum[g] = fuelSpectrum[g] + fluxTally; 
+  }
+  else if(id == 1)
+  {
+    modSpectrum[g] = modSpectrum[g] + fluxTally; 
+  }
+}

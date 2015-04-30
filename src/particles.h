@@ -24,6 +24,7 @@ class particle{
     int simulate();
     int simulate_implicit();
     bool roulette();
+    void spectrumTally(double,double,int);
     double weight;
     double estimatorTL,estimatorColl;
     friend class fission;
@@ -41,3 +42,6 @@ class fission{
 
 void makeSource(std::vector<fission>&,std::vector<particle>&,int);
 double calcEntropy(std::vector<fission> fissionBank);
+extern double fuelSpectrum[1001];
+extern double modSpectrum[1001];
+extern double energyGrid[1001];

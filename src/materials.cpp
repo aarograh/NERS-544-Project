@@ -90,6 +90,7 @@ void init_materials(int& fuelid, int& modid)
   materialList.push_back(new fuel(fuelid));
   modid = 1;
   materialList.push_back(new moderator(modid));
+ 
   return;
 }
 material* getPtr_material(int matid)
@@ -180,11 +181,10 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   double A = static_cast<double>(A_in);
   double beta = sqrt(neut_mass/(lightspeed*lightspeed)*A/(2*kB*T)); 
 
-
   bool transform1= false;
   bool transform2= false;
   double tmp = d_n[0];
-  if(fabs(1-d_n[2]) < nudge)
+  if(fabs(1-d_n[2]) < nudge*1.0E-04)
   {
     d_n[0] = d_n[2];
     d_n[2] = d_n[1];
@@ -193,6 +193,14 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
     transform1 = true;
   }
 
+//  std::cout << "Incoming neutron: " << std::endl;
+//  std::cout << "velocity = " << v_n << std::endl;
+//  std::cout << "omegax = " << d_n[0] << std::endl;
+//  std::cout << "omegay = " << d_n[1] << std::endl;
+//  std::cout << "omegaz = " << d_n[2] << std::endl;
+
+//  std::cout << "beta = " << beta <<  std::endl;
+//  std::cout << std::endl;
   double x;
   double y = beta*v_n;
   double w1 = sqrt(pi)*y/(2 + sqrt(pi)*y);
@@ -219,6 +227,10 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
     eta = drand();   
     f1 = sqrt(v_n*v_n + Vtil*Vtil - 2*v_n*Vtil*mutil)/(v_n+Vtil);
   }
+//  std::cout << "isotope = " << A << std::endl;
+//  std::cout << "Vtil = " << Vtil << std::endl;
+//  std::cout << "mutil = " << mutil << std::endl;
+//  std::cout << std::endl;
   
   // sample direction vector for the target nucleus Omega_T-hat 
   double gamma = 2*pi*drand();
@@ -244,7 +256,7 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   double ncy = vcy/vcn;
   double ncz = vcz/vcn;
 
-  if(fabs(1-ncz) < nudge)
+  if(fabs(1-ncz) < nudge*1.0E-04)
   {
     tmp = ncx;
     ncx = ncz;
@@ -279,6 +291,13 @@ void elastic(const double T, int A_in, double &v_n, double d_n[3])
   d_n[0] = vncx/v_n;
   d_n[1] = vncy/v_n;
   d_n[2] = vncz/v_n;
+//  std::cout << "Outgoing neutron: " << std::endl;
+//  std::cout << "velocity = " << v_n << std::endl;
+//  std::cout << "omegax = " << d_n[0] << std::endl;
+//  std::cout << "omegay = " << d_n[1] << std::endl;
+//  std::cout << "omegaz = " << d_n[2] << std::endl;
+
+//  std::cout << std::endl;
 
   if(transform1)
   {
@@ -295,3 +314,4 @@ double fuel::fissXS(double energy)
   double sqrE = sqrt(energy); 
   return fueldens[1]*(U235_fiss[0]+U235_fiss[1]/sqrE)*exp(U235_fiss[2]*sqrE);
 }
+

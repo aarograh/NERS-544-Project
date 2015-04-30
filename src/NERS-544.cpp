@@ -14,7 +14,8 @@ using namespace std;
 int main()
 {
 //  srand(time(NULL));
-  srand(10);
+  //srand(101230489);
+  srand(23549);
 
   int fuelid, modid;
   double pitch;
@@ -30,7 +31,7 @@ int main()
 
   init_materials(fuelid, modid);
 
-  int batch_size = 1E3;
+  int batch_size = 1E4;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
@@ -55,15 +56,32 @@ int main()
   double totalEntropy = 0.0, meanEntropy;
   int k = 0, l = 0, result, ktot = 0;
 
-  const int npitch = 10;
-  double pitches[npitch]  = {3.25,3.5,3.75,4.0,4.25,4.5,4.75,5.0,5.5,6.0};
+  const int npitch = 1;
+//  double pitches[npitch]  = {3.25,3.5,3.75,4.0,4.25,4.5,4.75,5.0,5.5,6.0};
+
+  // make the energy grid for flux tally
+  int decades = 10;
+  const int groups = 1001;
+  double x = -4;
+  double dg = (double)(decades)/(double)(groups-1);
+
+  for(int i = 0; i < groups; i++)
+  {
+    energyGrid[i] = 20*pow(10,x);
+    modSpectrum[i] = 0.0;
+    fuelSpectrum[i] = 0.0;
+    x = x+dg;
+  }
 
   ofstream myfile;
   myfile.open("keff.out");
 
+  ofstream spectrum;
+  spectrum.open("spectrum.out");
+
   for(int p = 0; p < npitch; p++)
   {
-    pitch = pitches[p];
+//    pitch = pitches[p];
     initPinCell(pitch, fuelid, modid);
 
     // zero all estimators
@@ -75,7 +93,10 @@ int main()
     tally_coll = 0;
     tally_TLsq = 0;
     tally_collsq = 0;
-    topleak = 0;
+    topCurrent = 0.0;
+    bottomCurrent = 0.0;
+    topleaksq = 0.0;
+    bottomleaksq = 0.0;
     bottomleak = 0;
     sigtop = 0.0;
     sigbottom = 0.0;
@@ -92,7 +113,7 @@ int main()
       // sample an axial location
       xyz[2] = 100.0*drand(); 
       // sample a direction
-      gamma = drand();
+      gamma = 2*pi*drand();
       mu = 2.0*drand() - 1.0;
       // add particle to the bank
       sourceBank.push_back(particle(xyz,gamma,mu,En,fuelid));
@@ -182,7 +203,7 @@ int main()
         sigtop << endl;
       cout << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
         << sigbottom << endl;
-      cout << "Shannon Entropy: " << ShannonEntropy[l] << endl;
+      cout << "Shannon Entropy: " << ShannonEntropy[k-1] << endl;
       cout << "Active cycle: " << l << endl;
       cout << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
 
@@ -207,10 +228,19 @@ int main()
       << sigbottom << endl;
     myfile << endl;
 
+    spectrum << "Pin pitch = " << endl;
+    spectrum << "Active cycles: " << active_iters << endl;
+    spectrum << "Inactive cycles: " << inactive_iters << endl;
+    spectrum << " Energy " << " fuel spectrum " << " moderator spectrum " << endl;
+    for(int g = 0; groups; g++)
+    {
+      spectrum << energyGrid[g] << fuelSpectrum[g] << modSpectrum[g] << endl; 
+    }
     // clean out old geometry
     clearGeom();
 
   }
   myfile.close();
+  spectrum.close();
   return 0;
 }
