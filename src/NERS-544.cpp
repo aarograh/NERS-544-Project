@@ -16,11 +16,12 @@ int main()
 {
   srand(time(NULL));
 
-  int fuelid, modid;
+  // Have user input the pitch
   double pitch;
   cout << "Enter the pin pitch in cm (must be greater than 3.0):";
   cin >> pitch;
 
+  // Check the pitch
   if (pitch <= 3.0)
   {
     cout << "Error!  Pin pitch must be greater than pin diameter of 3.0 cm!"
@@ -28,8 +29,7 @@ int main()
     exit(-1);
   }
 
-  init_materials(fuelid, modid);
-
+  // Set up batch size and declare neutron-related variables
   int batch_size = 1E3;
   double En;
   double xyz[3];
@@ -47,8 +47,9 @@ int main()
   double bottomleaksq = 0.0;
   double keff_TL, keff_Coll, sigTL, sigColl, active_particles;
   double topleak, bottomleak, sigtop, sigbottom, score = 0.0;
-  particle neutron = particle(xyz,gamma,mu,En,fuelid);
   double fuelVolume = 100.0*pi*1.5*1.5;
+  // Set up neutron variable with random nonsense for later use
+  particle neutron = particle(xyz,gamma,mu,En,topSurf);
 
   // outer loop over power iterations
   const int max_iters = 200, active_iters = 180, inactive_iters = 20;
@@ -62,6 +63,7 @@ int main()
   double x = -10;
   double dg = (double)(decades)/(double)(groups-1);
 
+  // Set up energy grid for spectrum edits
   for(int i = 0; i < groups; i++)
   {
     energyGrid[i] = 30.0*pow(10,x);
@@ -70,6 +72,7 @@ int main()
     x = x+dg;
   }
 
+  // Set up output streams for various desired outputs
   stringstream convert;
   convert << pitch << ".out";
   string filename = convert.str();
@@ -88,6 +91,10 @@ int main()
   string output = out.str();
   outfile.open(output.c_str());
 
+  // Initialize materials needed for the problem
+  int fuelid, modid;
+  init_materials(fuelid, modid);
+  // Initialize pin cell
   initPinCell(pitch, fuelid, modid);
 
   // zero all estimators
@@ -125,6 +132,7 @@ int main()
     sourceBank.push_back(particle(xyz,gamma,mu,En,fuelid));
   }
   
+  // Perform loop over all cycles
   while(k < max_iters)
   {
     k = k+1; // total power iterations 
@@ -248,6 +256,7 @@ int main()
       fuelSpectrum[g] << "\t" << modSpectrum[g] << endl; 
   }
 
+  // Close files and clear variables
   myfile.close();
   spectrum.close();
   outfile.close();
