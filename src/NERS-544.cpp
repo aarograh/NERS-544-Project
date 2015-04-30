@@ -86,6 +86,12 @@ int main()
   string spectrumfile = spec.str();
   spectrum.open(spectrumfile.c_str());
 
+  ofstream outfile;
+  stringstream out;
+  out << "output." << pitch;
+  string output = out.str();
+  outfile.open(output.c_str());
+
     initPinCell(pitch, fuelid, modid);
 
     // zero all estimators
@@ -198,26 +204,26 @@ int main()
       ktot = ktot + fissionBank.size();
 
       // Do some output
-      cout << "Source iteration: " << k << endl;
-      cout << "rough keff estimate = " << (double)(ktot)/
-        (double)(batch_size*k) << endl;
-      cout << "track length keff estimate = " << keff_TL << ", uncertainty = " 
-        << sigTL << endl;
-      cout << "collision keff estimate = " << keff_Coll << ", unceratainty = " 
-        << sigColl << endl;
-      cout << "Top leakage estimate = " << topleak << ", uncertainty = " << 
-        sigtop << endl;
-      cout << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
-        << sigbottom << endl;
-      cout << "Shannon Entropy: " << ShannonEntropy[k-1] << endl;
-      cout << "Active cycle: " << l << endl;
-      cout << "Fission bank has " << fissionBank.size() << " neutrons." 
+      outfile << "Source iteration: " << k << endl;
+      outfile << "rough keff estimate = " << (double)(ktot)/(double)(batch_size*k) 
         << endl;
+      outfile << "track length keff estimate = " << keff_TL << ", uncertainty = " 
+        << sigTL << endl;
+      outfile << "collision keff estimate = " << keff_Coll << ", unceratainty = " 
+        << sigColl << endl;
+      outfile << "Top leakage estimate = " << topleak << ", uncertainty = " << 
+        sigtop << endl;
+      outfile << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
+        << sigbottom << endl;
+      outfile << "Shannon Entropy: " << ShannonEntropy[k-1] << endl;
+      outfile << "Active cycle: " << l << endl;
+      outfile << "Fission bank has " << fissionBank.size() << " neutrons." << endl;
 
       // Make Source Bank
-      cout << "Making source bank from fission bank..." << endl;
+      outfile << "Making source bank from fission bank..." << endl;
       makeSource(fissionBank,sourceBank,batch_size);
-      cout << "Source bank size = " << sourceBank.size() << endl << endl;
+      outfile << "Source bank size = " << sourceBank.size() << endl << endl;
+
     }
     cout << "The pin pitch was " << pitch << endl;
 
@@ -247,5 +253,6 @@ int main()
     }
   myfile.close();
   spectrum.close();
+  outfile.close();
   return 0;
 }
