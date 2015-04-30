@@ -1,5 +1,11 @@
-% AUTHORS: Aaron Graham, Mike Jarret
+% AUTHORS: Aaron Graham, Mike Jarrett
 % PURPOSE: NERS 544 Course Project Report
 % DATE   : April 30, 2015
 
-The infinite lattice (pin cell) problem was successfully simulated using a Monte Carlo program.  Estimators were used to determine the value of k-eff and axial leakages for the pin cell as a function of pin pitch.  The values obtained were consistent with the expectations for this kind of problem, indicating that code is producing correct results.
+The infinite lattice (pin cell) problem was successfully simulated using a Monte Carlo program. Estimators were used to determine the value of k-eff and axial leakages for the pin cell as a function of pin pitch.  The values obtained were consistent with the expectations for this kind of problem, indicating that code is producing correct results. The effective multiplication is subcritical if there is too little or too much moderator in the problem. For pitches between approximately 3.75 cm and 5.5 cm, the infinite lattice is close to critical. The criticality peaks at approximately 1.071, near 4.5 cm.
+
+The Shannon entropy proved to be a useful indicator of fission source convergence. In this problem, the neutrons have a mean-free-path of several cm, and most neutrons scatter at least a few dozen times before being absorbed. As a result, neutrons can travel over virtually the entire problem geometry during a single history, which allows the fission source to converge rapidly. In a large reactor problem, the dominance ratio might be very close to unity, in which case it would take many more inactive cycles to converge the fission source. However, for this small problem, 20 inactive cycles was deemed sufficient to avoid bias in the estimators due to the initial fission source guess.
+
+The energy spectra in the fuel and moderator were tallied to give us more physical insight into the problem. The spectra help to explain the trend of effective multiplication as a function of pitch. With a very small pitch, the problem is undermoderated, and the thermal flux is very small compared to the fast flux. With a large pitch it is overmoderated, and the thermal flux is too high in the moderator, leading to absorption.
+
+While this problem was highly simplified, we exercised many of the same fundamental functionalities of a production Monte Carlo code which were covered in lecture, such as surface tracking, macroscopic cross section calculation, anisotropic lab-frame scattering, reaction rate and flux tallies.

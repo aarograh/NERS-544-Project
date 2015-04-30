@@ -43,9 +43,8 @@ The \textit{moderator} class contains variables for the oxygen and hydrogen numb
 The \textit{fuel} class has similar information, but for oxygen, U-235, and U-238.  It also contains fission cross-section and resonance information, which the \textit{moderator} class does not require.  This class has three main methods defined:
 
 \begin{itemize}
-\item \textit{void fuelMacro(double, double*, double*, double*)} -- Similar to its \textit{moderator} counterpart, it returns the total cross-section and other information about interaction probabilities.
-\item \textit{int sample{\_}U(double, double*, double*, double*, double*)} -- This function uses a random number to determine which isotope of the fuel the neutron is interacting with, and sets appropriate probabilities of absorption and fission based on that result.
-\item \textit{double fissXS(double)} -- This function claculates the fission cross-section of U-235 given a particular energy.
+\item \textit{void fuelMacro(double, double*, double*, double*,double*,double*)} -- Similar to its \textit{moderator} counterpart, it returns the total cross-section and other information about interaction probabilities.
+\item \textit{int sample{\_}U( double*, double*)} -- This function uses a random number to sample an isotope in the fuel off of which the neutron scatters.
 \end{itemize}
 
 In addition to these class definitions, this module also contains a routine \textit{void init{\_}materials(int\& , int\& )} which sets up the fuel and moderator materials.  It also defines a function \textit{void elastic(const double, int, double\& , double[3])}, which performs elastic scattering off a material.  There is also a \textit{getPtr{\_}material} function which ended up not being used due to how the materials were defined.
@@ -58,7 +57,7 @@ This module contains a definition of the \textit{particle} and \textit{fission} 
 
 \begin{itemize}
 \item $return == 0$ -- Particle was absorbed, so nothing is done with the result.
-\item $return > 0$ -- The particle caused fission, and the return value contains the number of fission neutrons which is produces.
+\item $return > 0$ -- The particle caused fission, and the return value contains the number of fission neutrons which it produces.
 \item $return < 0$ -- the particle escaped, and the return value contains the negative of the surface ID across which it leaked.
 \end{itemize}
 
@@ -93,13 +92,14 @@ The driver contains the actual iteration logic to solve the problem.  The proble
 11. & \textit{for i $=$ 1 to active{\_}cycles + inactive{\_}cycles, do:} \\
 12. & \quad \textit{while source bank is empty, do:} \\
 13. & \quad\quad Remove neutron from bank and simulate it \\
-14. & \quad\quad If neutron caused fission, at fissions to fission bank \\
+14. & \quad\quad If neutron caused fission, add fissions to fission bank \\
 15. & \quad\quad Accumulate k-eff estimators for this iteration \\
 16. & \quad\quad Destroy particle \\
 17. & \quad Calculate Shannon Entropy \\
 18. & \quad If $i > $\textit{inactive{\_}cycles}, accumulate estimators \\
 19. & \quad Output updated results \\
-20. & Exit.
+20. & \quad Make source bank and empty fission bank \\
+21. & Exit.
 \end{tabular}
 \end{center}
 
