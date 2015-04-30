@@ -89,7 +89,7 @@ The driver contains the actual iteration logic to solve the problem.  The proble
 7.  & \quad Randomly sample position, direction, and energy for neutron \\
 8.  & \quad Add neutron to source bank \\
 9.  & Initialize estimators to 0 \\
-10. & \textit{active{\_}cycles $=70$}; \textit{inactive{\_}cycles $=30$} \\
+10. & \textit{active{\_}cycles $=180$}; \textit{inactive{\_}cycles $=20$} \\
 11. & \textit{for i $=$ 1 to active{\_}cycles + inactive{\_}cycles, do:} \\
 12. & \quad \textit{while source bank is empty, do:} \\
 13. & \quad\quad Remove neutron from bank and simulate it \\
@@ -105,7 +105,7 @@ The driver contains the actual iteration logic to solve the problem.  The proble
 
 All of these steps are performed using functions described in the earlier modules.  The track-length and collision estimators are accumulated for each neutron as it moves throughout the pin cell and interacts with the materials.  The leakage estimators and number of fission neutrons are calculated using the return value of the \textit{particle::simulate()} routine.
 
-The number of active and inactive cycles used is an inexact science.  The values we selected were determined from running several different problems and observing when the Shannon Entropy and leakage estimates seemed to stabilize.  Running 30 inactive cycles before beginning tallies seemed to consistently be a minimal but sufficiently large number of cycles to keep any initial biases out of the final tally results for any reasonable pin pitch.
+The number of active and inactive cycles used is an inexact science.  The values we selected were determined from running several different problems and observing when the Shannon Entropy and leakage estimates seemed to stabilize.  Running 20 inactive cycles seemed to be enough to get any bias out of the results.  After 20 inactive cycles, 180 active cycles were run to obtain estimates of desired quantities with sufficiently low uncertainty.
 
 The driver source code is found in Appendix I.
 
