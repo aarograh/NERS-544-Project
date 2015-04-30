@@ -3,7 +3,9 @@
 // DATE   : April 30, 2015
 
 #include <iostream>
+#include <ostream>
 #include <fstream>
+#include <sstream>
 #include "utils.h"
 #include "particles.h"
 #include "geometry.h"
@@ -31,7 +33,7 @@ int main()
 
   init_materials(fuelid, modid);
 
-  int batch_size = 1E4;
+  int batch_size = 1E5;
   double En;
   double xyz[3];
   double pinrad = 1.5; // pin radius = 1.5 cm
@@ -51,12 +53,11 @@ int main()
   particle neutron = particle(xyz,gamma,mu,En,fuelid);
 
   // outer loop over power iterations
-  const int max_iters = 100, active_iters = 80, inactive_iters = 20;
+  const int max_iters = 200, active_iters = 180, inactive_iters = 20;
   double ShannonEntropy[max_iters];
   double totalEntropy = 0.0, meanEntropy;
   int k = 0, l = 0, result, ktot = 0;
 
-  const int npitch = 1;
 //  double pitches[npitch]  = {3.25,3.5,3.75,4.0,4.25,4.5,4.75,5.0,5.5,6.0};
 
   // make the energy grid for flux tally
@@ -73,15 +74,17 @@ int main()
     x = x+dg;
   }
 
+  stringstream convert;
+  convert << pitch << ".out";
+  string filename = convert.str();
   ofstream myfile;
-  myfile.open("keff.out");
-
+  myfile.open(filename.c_str());
+/*
   ofstream spectrum;
-  spectrum.open("spectrum.out");
-
-  for(int p = 0; p < npitch; p++)
-  {
-//    pitch = pitches[p];
+  convert << "spectrum." << pitch;
+  string spectrumfile = convert.str();
+  spectrum.open(spectrumfile.c_str());
+*/
     initPinCell(pitch, fuelid, modid);
 
     // zero all estimators
@@ -227,7 +230,7 @@ int main()
     myfile << "Bottom leakage estimate = " << bottomleak << ", uncertainty = " 
       << sigbottom << endl;
     myfile << endl;
-
+/*
     spectrum << "Pin pitch = " << endl;
     spectrum << "Active cycles: " << active_iters << endl;
     spectrum << "Inactive cycles: " << inactive_iters << endl;
@@ -236,11 +239,8 @@ int main()
     {
       spectrum << energyGrid[g] << fuelSpectrum[g] << modSpectrum[g] << endl; 
     }
-    // clean out old geometry
-    clearGeom();
-
-  }
+*/
   myfile.close();
-  spectrum.close();
+//  spectrum.close();
   return 0;
 }

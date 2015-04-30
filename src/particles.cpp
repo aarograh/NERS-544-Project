@@ -408,7 +408,7 @@ void makeSource(std::vector<fission> &fissionBank,
     {
       xi = drand(); 
       sourceProb = static_cast<double>((batch_size-sourceBank.size())/
-                   static_cast<double>fissionBank.size());
+                   static_cast<double>(fissionBank.size()));
       if(xi < sourceProb)
       {
         fissptr = &fissionBank.back();
@@ -462,20 +462,6 @@ double calcEntropy(std::vector<fission> fissionBank)
   }
   
   int index;
-  int fissionMesh[50];
-   for(int j = 0; j < 50; j++)
-   {
-     fissionMesh[j] = 0;
-   }
-   for(int n = 0; n < fissionBank.size(); n++)
-   {
-     index = (int)(fissionBank[n].position[2]/2.0);
-     fissionMesh[index] = fissionMesh[index]+1;
-   }
-   for(int j = 0; j < 50; j++)
-   {
-     std::cout << j << "\t" << fissionMesh[j] << std::endl;
-   }
 
   // bin all of the particles
   // uniform axial bins, equal-area radial bins
